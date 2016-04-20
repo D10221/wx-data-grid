@@ -5,27 +5,34 @@
     "unitPrice": 2.90,
     "tax": 1.14 ,
     "discounted": true,
-    "created" : "2012-11-11 "
+    "created" : "2012-04-04",
+    "modified": "2012-04-04"
   },
   {
     "material": "Plywood (Birch)",
     "quantity" : 50,
     "unitPrice": 1.25,
     "tax": 1.14,
-    "discounted": false
+    "discounted": false,
+    "created" : "2012-04-04",
+    "modified": "2012-04-04"
   },
   {
     "material": "Laminate (Gold on Blue)",
     "quantity" : 100,
     "unitPrice": 100.3,
     "tax": 1.14,
-    "discounted": true
+    "discounted": true,
+    "created" : "2012-04-04",
+    "modified": "2012-04-04"
   },
   {
     "material": "Other",
     "quantity" : 100,
     "unitPrice": 5,
     "tax": 1.14,
-    "discounted": false
+    "discounted": false,
+    "created" : "2012-04-04",
+    "modified": "2012-04-04"
   }
 ]

@@ -30,7 +30,7 @@
     <div>
         <span data-bind="text: @brand"></span>
     </div>
-    <div data-bind="component: { name: 'data-table' , params: { items: items} }"></div>
+    <div data-bind="component: { name: 'data-table' , params: { items: items, columnMaps: columnMaps} }"></div>
 
 </div>
 
@@ -64,7 +64,7 @@
                         <input data-bind="attr: { type: getInputType() }, checked: @value"/>
                     </div>
                     <div data-bind="ifnot: isInputTypeOf('checkbox')">
-                        <input data-bind="value: @value, attr: { type: getInputType() }, checked: @value"/>
+                        <input data-bind="value: @value, attr: { type: getInputType() }"/>
                     </div>
 
                 </td>
@@ -72,7 +72,7 @@
         </tbody>
     </table>
 </template>
-
+<script src="../node_modules/moment/moment.js"></script>
 <script src="../node_modules/lodash/lodash.js" ></script>
 <script src="../node_modules/rx/dist/rx.all.js" ></script>
 <script src="../node_modules/webrx/dist/web.rx.js" ></script>

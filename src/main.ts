@@ -7,64 +7,97 @@ import IObservableList = wx.IObservableList;
 wx.app.devModeEnable();
 
 
+wx.app.filter('string-to-date-converter', function(input: string) {
+    return input ;//? moment(input).toDate() : null;
+});
+
 interface TableVmParams {
-    items: wx.IObservableList<{}>;
+    items:wx.IObservableList<{}>;
+    columnMaps?:ColumnMap[];
 }
 
-class Cell {
-    
-    value: wx.IObservableProperty<any>;
-    
+class Cell implements Rx.IDisposable {
+
+    isDirty = wx.property(false) ;
+
+    constructor(public key:string, private _value:any) {
+
+        this.value = wx.property(_value);
+
+        this.value.changed.subscribe(e=>{
+            if(_value != e) {
+                this.isDirty(true);
+            }
+        });
+    }
+
+    value:wx.IObservableProperty<any>;
+
     selected = wx.property(false);
-    
+
     toggleSelected = wx.command(()=> this.selected(!this.selected()));
 
-    constructor(public key: string , private _value: any){
-        this.value = wx.property(_value);
-    }
+    inputType: string;
 
-    getInputType () :string  {
-        if(_.isDate(this.value())) return "date";
-        if(_.isNumber(this.value())) return "number";
-        if(_.isBoolean(this.value())) return "checkbox";
+    /***
+     *  HTMLInputElement type
+     * @returns {string}
+     */
+    getInputType():string {
+
+        // Override ?
+        if (InputTypes.any(this.inputType)) {
+            return this.inputType;
+        }
+
+        var value = this.value();
+
+        if ( _.isDate(value)) return "date";
+        if (_.isNumber(value)) return "number";
+        if (_.isBoolean(value)) return "checkbox";
         return "text";
     }
-    
-    isInputTypeOf(type: string): boolean {
+
+
+    isInputTypeOf(type:string):boolean {
         return this.getInputType() == type;
+    }
+
+    dispose(){
+
     }
 }
 
-class Row{
+class Row {
 
     cells = wx.list<Cell>();
-    
-    constructor(_values: Cell[] = null ){
-        if(_values){
+
+    constructor(_values:Cell[] = null) {
+        if (_values) {
             this.cells.addRange(_values);
         }
     }
-    
+
     isSelected = wx.property(false);
 
     toggleSelected = wx.command(()=> this.isSelected(!this.isSelected()));
-    
-    visible =  wx.property(true);
-    
-    findCellByKey: (key:string)=> Cell = (key) => {
-        return _.find(this.cells.toArray(), cell => cell.key == key );
+
+    visible = wx.property(true);
+
+    findCellByKey:(key:string)=> Cell = (key) => {
+        return _.find(this.cells.toArray(), cell => cell.key == key);
     };
 
-    findCellValueByKey: (key:string)=> any = (key) => {
-        var cell = _.find(this.cells.toArray(), cell => cell.key == key );
-        return cell ? cell.value() : null ;
+    findCellValueByKey:(key:string)=> any = (key) => {
+        var cell = _.find(this.cells.toArray(), cell => cell.key == key);
+        return cell ? cell.value() : null;
     };
 
     /***
      * Set this.visible == true cell with key value;s to string matches regex
      * @param kv
      */
-    setVisble(kv:KeyVaue){
+    setVisble(kv:KeyVaue) {
         var txt = this.findCellValueByKey(kv.key)
             .toString();
         var ok = new RegExp(kv.value).test(txt);
@@ -72,45 +105,70 @@ class Row{
     }
 }
 
-class Column implements Rx.IDisposable{
+class InputTypes  {
+
+    static values: string [] = ['date', 'number', 'text', 'checkbox'];
+
+    static any(inputType: string) : boolean  {
+        return inputType && _.find(InputTypes.values, x=> x == inputType) ? true : false;
+    }
+}
+
+
+interface ColumnMap {
+    key:string,
+    displayName?:string;
+    inputType?:string;
+    converter?: string
+}
+
+class Column implements Rx.IDisposable {
+
     id = Guid.newGuid();
-    
-    constructor(public key: string, public header? :string) {
+
+    constructor(public key:string, public header?:string) {
         this.header = header || key;
     }
 
-    isUnbound =  false;
+    converter: wx.IExpressionFilter;
+
+    inputType:string;
+    isUnbound = false;
     /***
      * 'desc' || 'asc'
      * @type {IObservableProperty<string>}
      */
     order = wx.property('desc');
-    
-    toggleOrder = wx.command( ()=> this.order( this.order() == 'desc' ? 'asc' : 'desc' ));
 
-    canSort= wx.property(true);
+    toggleOrder = wx.command(()=> this.order(this.order() == 'desc' ? 'asc' : 'desc'));
 
-    browsable: boolean  = true;
+    canSort = wx.property(true);
 
-    get orderChanged(): Rx.Observable<KeyVaue> {
+    browsable:boolean = true;
+
+    get orderChanged():Rx.Observable<KeyVaue> {
         return this
             .order
             .changed
             .where(x=> this.canSort())
-            .select( () => {  return  { key: this.key, value: this.order() } } );
+            .select(() => {
+                return {key: this.key, value: this.order()}
+            });
     }
 
-    filterTxt  = wx.property("");
+    filterTxt = wx.property("");
     canFilter = true;
 
-    get filterTxtChanged() : Rx.Observable<KeyVaue> {
+    get filterTxtChanged():Rx.Observable<KeyVaue> {
         return this
             .filterTxt
             .changed
-            .select(x=> { return {key: this.key, value: this.filterTxt()} });
+            .select( () => {
+                return {key: this.key, value: this.filterTxt()}
+            });
     }
 
-    dispose(){
+    dispose() {
         this.order.dispose();
     }
 }
@@ -120,14 +178,13 @@ class TableVm {
 
     columns = wx.list<Column>();
 
-    constructor(private params:TableVmParams ) {
+    constructor(private params:TableVmParams) {
 
         params.items.listChanged.subscribe(()=> {
 
             this.columns.clear();
 
             var first = this.params.items.toArray()[0];
-
             { // extra column
                 var column = new Column('isSelected');
                 column.canSort(false);
@@ -136,8 +193,21 @@ class TableVm {
                 this.columns.push(column);
             }
 
-            for( var key in first){
+            // GenerateColumns from 1st item
+            // has to go ...
+            // not reliable
+            for (var key in first) {
                 var column = new Column(key);
+                if(params.columnMaps ){
+                    var map = _.find(params.columnMaps, m=> m.key == key);
+                    if(map){
+                        column.header = map.displayName;
+                        column.inputType = map.inputType;
+                        if(map.converter){
+                            column.converter = wx.app.filter(map.converter);
+                        }
+                    }
+                }
                 column
                     .orderChanged
                     .subscribe(x=> this.sortBy(x.key, x.value));
@@ -145,7 +215,7 @@ class TableVm {
                     .filterTxtChanged
                     .subscribe(x=> this.filterBy(x));
 
-                this.columns.push( column);
+                this.columns.push(column);
             }
 
             //Rows : is Cell[]
@@ -154,18 +224,27 @@ class TableVm {
 
                 var row = new Row();
 
-                var selector = new Cell('isSelected',false);
-                selector.value.changed.subscribe((x)=>{
-                    row.isSelected(x =='true' || x == true);
+                var selector = new Cell('isSelected', false);
+                selector.value.changed.subscribe((x)=> {
+                    row.isSelected(x == 'true' || x == true);
                 });
 
-                row.cells.push( selector);
-                for (var key in x){
+                row.cells.push(selector);
+                for (var key in x) {
                     // ** filter out c ell by column
                     var c = _.find(columns, c=> c.key == key);
-                    if (!c || !c.browsable) { continue }
+                    if (!c || !c.browsable) {
+                        continue
+                    }
                     //** new cell
-                    var cell = new Cell(key, x[key]);
+                    var value = c.converter ? c.converter(x[key]) : x[key] ;
+                    var cell = new Cell(key, value);
+
+                    // Override:  by settings , config ... etc
+                    if (InputTypes.any(c.inputType)) {
+                        cell.inputType = c.inputType;
+                    }
+
                     row.cells.push(cell);
                 }
                 return row;
@@ -174,47 +253,48 @@ class TableVm {
 
     }
 
-    private filterBy(kv:KeyVaue){
-        for(var row of this.rows.toArray()){
+
+    private filterBy(kv:KeyVaue) {
+        for (var row of this.rows.toArray()) {
             row.setVisble(kv);
         }
     }
 
-    private sortBy(key:string, mode: string) {
+    private sortBy(key:string, mode:string) {
 
-        if(mode == "asc"){
+        if (mode == "asc") {
 
-            var find = function(row:Row) : any {
+            var find = function (row:Row):any {
                 return row.findCellValueByKey(key);
             };
 
-            var r = _.sortBy(this.rows.toArray(),find);
+            var r = _.sortBy(this.rows.toArray(), find);
 
             this.rows.clear();
 
             this.rows.addRange(_.reverse(r));
 
-            return ;
+            return;
         }
 
-        if( mode == "desc"){
+        if (mode == "desc") {
 
-            var find = function(row:Row) : any {
+            var find = function (row:Row):any {
                 return row.findCellValueByKey(key);
             };
 
-            var r = _.sortBy(this.rows.toArray(),find);
+            var r = _.sortBy(this.rows.toArray(), find);
 
             this.rows.clear();
 
             this.rows.addRange(r);
 
-            return ;
+            return;
         }
         throw "unkown sort method";
     }
 }
-interface KeyVaue{
+interface KeyVaue {
     key:string;
     value:any;
 }
@@ -224,23 +304,42 @@ class MainViewModel {
 
     items = wx.list();
 
+    columnMaps: ColumnMap[] = [{
+        key: 'created',
+        displayName: 'Date Created',
+        inputType: 'date',
+        converter: 'string-to-date-converter'
+    },{
+        key: 'modified',
+        displayName: 'Date Created',
+        inputType: 'date',
+        converter: 'string-to-date-converter'
+    }];
+
     constructor() {
 
         fetch('../data/items.json')
-            .then( r => r.json())
-            .then(items =>  {
+            .then(r => r.json())
+            .then(items => {
+                // for(var item of items){
+                //     if(item.created && _.isString(item.created)){
+                //         item.created = Date.parse(item.created);
+                //     }
+                //     if(item.modified && _.isString(item.modified)){
+                //         item.modified = Date.parse(item.modified);
+                //     }
+                // }
                 this.items.addRange(items);
             })
-            .catch(e=>{
+            .catch(e=> {
                 console.log(`Error: ${e}`);
             });
     }
 }
-;
 
-wx.app.component('data-table',{
-   template: { select : 'data-table-template' },
-   viewModel: (params: TableVmParams)=> new TableVm(params)
+wx.app.component('data-table', {
+    template: {select: 'data-table-template'},
+    viewModel: (params:TableVmParams)=> new TableVm(params)
 });
 
 wx.applyBindings(new MainViewModel(), document.getElementById('main-view'));
