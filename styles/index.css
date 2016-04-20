@@ -1,0 +1,51 @@
+.row-selected {
+    background: pink;
+}
+
+.cell-dirty {
+    background: orange;
+}
+
+tr {
+    border: 1px solid black;
+}
+
+th {
+    border: 1px solid black;
+}
+
+table {
+    border: 1px solid black ;
+}
+
+td {
+    border: 1px solid black;
+}
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 50px;
+    background-color: white;
+    color: black;
+    text-align: center;
+    padding: 15px ;
+    margin: 15px;
+    border-radius: 45px;
+
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}

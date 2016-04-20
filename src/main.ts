@@ -20,15 +20,21 @@ class Cell implements Rx.IDisposable {
 
     isDirty = wx.property(false) ;
 
+    isDirtyCheckEnable = true;
+
+    revertCmd = wx.command(()=> this.value(this._value));
+
+    _disposables = new Rx.CompositeDisposable();
+
     constructor(public key:string, private _value:any) {
 
         this.value = wx.property(_value);
 
-        this.value.changed.subscribe(e=>{
-            if(_value != e) {
-                this.isDirty(true);
-            }
-        });
+        this._disposables.add(
+                this.value.changed
+                    .where(e => this.isDirtyCheckEnable)
+                    .subscribe(e=> this.isDirty(_value != e))
+        );
     }
 
     value:wx.IObservableProperty<any>;
@@ -64,7 +70,7 @@ class Cell implements Rx.IDisposable {
     }
 
     dispose(){
-
+        this._disposables.dispose();
     }
 }
 
@@ -186,7 +192,7 @@ class TableVm {
 
             var first = this.params.items.toArray()[0];
             { // extra column
-                var column = new Column('isSelected');
+                var column = new Column('isSelected','\u273D');
                 column.canSort(false);
                 column.canFilter = false;
                 column.isUnbound = true;
@@ -225,6 +231,7 @@ class TableVm {
                 var row = new Row();
 
                 var selector = new Cell('isSelected', false);
+                selector.isDirtyCheckEnable = false;
                 selector.value.changed.subscribe((x)=> {
                     row.isSelected(x == 'true' || x == true);
                 });
@@ -244,6 +251,9 @@ class TableVm {
                     if (InputTypes.any(c.inputType)) {
                         cell.inputType = c.inputType;
                     }
+                    // if(c.isUnbound){
+                    //     cell.isDirtyCheckEnable = false;
+                    // }
 
                     row.cells.push(cell);
                 }
