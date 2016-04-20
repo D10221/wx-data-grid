@@ -29,30 +29,34 @@ class Cell {
         if(_.isBoolean(this.value())) return "checkbox";
         return "text";
     }
+    
+    isInputTypeOf(type: string): boolean {
+        return this.getInputType() == type;
+    }
 }
 
 class Row{
-    constructor( values: wx.IList<Cell>){
 
-        this.values.push( new Cell('select',false));
-
-        this.values.addRange(values.toArray());
+    cells = wx.list<Cell>();
+    
+    constructor(_values: Cell[] = null ){
+        if(_values){
+            this.cells.addRange(_values);
+        }
     }
     
-    selected = wx.property(false);
+    isSelected = wx.property(false);
 
-    toggleSelected = wx.command(()=> this.selected(!this.selected()));
-    
-    values= wx.list<Cell>();
+    toggleSelected = wx.command(()=> this.isSelected(!this.isSelected()));
     
     visible =  wx.property(true);
     
     findCellByKey: (key:string)=> Cell = (key) => {
-        return _.find(this.values.toArray(), cell => cell.key == key );
+        return _.find(this.cells.toArray(), cell => cell.key == key );
     };
 
     findCellValueByKey: (key:string)=> any = (key) => {
-        var cell = _.find(this.values.toArray(), cell => cell.key == key );
+        var cell = _.find(this.cells.toArray(), cell => cell.key == key );
         return cell ? cell.value() : null ;
     };
 
@@ -70,10 +74,12 @@ class Row{
 
 class Column implements Rx.IDisposable{
     id = Guid.newGuid();
+    
     constructor(public key: string, public header? :string) {
         this.header = header || key;
     }
 
+    isUnbound =  false;
     /***
      * 'desc' || 'asc'
      * @type {IObservableProperty<string>}
@@ -94,7 +100,8 @@ class Column implements Rx.IDisposable{
             .select( () => {  return  { key: this.key, value: this.order() } } );
     }
 
-    filterTxt  = wx.property(".");
+    filterTxt  = wx.property("");
+    canFilter = true;
 
     get filterTxtChanged() : Rx.Observable<KeyVaue> {
         return this
@@ -105,7 +112,6 @@ class Column implements Rx.IDisposable{
 
     dispose(){
         this.order.dispose();
-
     }
 }
 class TableVm {
@@ -123,11 +129,10 @@ class TableVm {
             var first = this.params.items.toArray()[0];
 
             { // extra column
-                var column = new Column('select');
+                var column = new Column('isSelected');
                 column.canSort(false);
-
-                column.order.changed.subscribe(x=> this.sortBy(column.header, column.order()));
-
+                column.canFilter = false;
+                column.isUnbound = true;
                 this.columns.push(column);
             }
 
@@ -146,16 +151,24 @@ class TableVm {
             //Rows : is Cell[]
             var columns = this.columns.toArray();
             this.rows.addRange(this.params.items.map(x=> {
-                var values = wx.list<Cell>();
-                for (var key in x){
 
+                var row = new Row();
+
+                var selector = new Cell('isSelected',false);
+                selector.value.changed.subscribe((x)=>{
+                    row.isSelected(x =='true' || x == true);
+                });
+
+                row.cells.push( selector);
+                for (var key in x){
+                    // ** filter out c ell by column
                     var c = _.find(columns, c=> c.key == key);
                     if (!c || !c.browsable) { continue }
-
+                    //** new cell
                     var cell = new Cell(key, x[key]);
-                    values.push(cell);
+                    row.cells.push(cell);
                 }
-                return new Row(values);
+                return row;
             }));
         })
 

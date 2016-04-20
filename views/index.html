@@ -3,6 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style type="text/css">
+        .row-selected {
+            background: pink;
+        }
+
+        tr {
+            border: 1px solid black;
+        }
+
+        th {
+            border: 1px solid black;
+        }
+
+        table {
+            border: 1px solid black ;
+        }
+
+        td {
+            border: 1px solid black;
+        }
+    </style>
 </head>
 <body>
 <div id="main-view">
@@ -14,35 +35,38 @@
 </div>
 
 <style>
-    .selected {
-        background: green;
-    }
+
 </style>
 <template id="data-table-template">
-    <table style="border: solid black">
+    <table>
         <thead>
             <tr data-bind="foreach: columns">
-                <th style="border: solid black;" >
+                <th >
                     <div >
                         <span data-bind="text: header"></span>
                         <div style="display: flex">
-                            <div>
+                            <div data-bind="visible: canFilter">
                                 <input type="text" data-bind="value: @filterTxt"/>
                             </div>
                             <button data-bind="
                                 text: order == 'asc' ? '\u25B2' : '\u25BC' ,
                                 command: toggleOrder,
-                                visible: @canSort"/>
+                                visible: @canSort" />
                         </div>
                     </div>
                 </th>
             </tr>
         </thead>
         <tbody data-bind="foreach: rows">
-            <tr style="border: solid black;" data-bind="foreach: values, css:{ selected: selected }, visible: @visible">
-                <!--for e/dataSource create a row -->
-                <td style="border: solid black;">
-                    <input data-bind="value: @value, attr: { type: getInputType() }"/>
+            <tr data-bind="css: { 'row-selected': @isSelected }, visible: @visible, foreach: cells">
+                <td>
+                    <div data-bind="if: isInputTypeOf('checkbox') ">
+                        <input data-bind="attr: { type: getInputType() }, checked: @value"/>
+                    </div>
+                    <div data-bind="ifnot: isInputTypeOf('checkbox')">
+                        <input data-bind="value: @value, attr: { type: getInputType() }, checked: @value"/>
+                    </div>
+
                 </td>
             </tr>
         </tbody>
