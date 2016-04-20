@@ -1,0 +1,26 @@
+[
+  {
+    "material": "Acrylic (Transparent)",
+    "quantity" : 10,
+    "unitPrice": 2.90,
+    "tax": 1.14
+  },
+  {
+    "material": "Plywood (Birch)",
+    "quantity" : 50,
+    "unitPrice": 1.25,
+    "tax": 1.14
+  },
+  {
+    "material": "Laminate (Gold on Blue)",
+    "quantity" : 100,
+    "unitPrice": 100.3,
+    "tax": 1.14
+  },
+  {
+    "material": "Other",
+    "quantity" : 100,
+    "unitPrice": 5,
+    "tax": 1.14
+  }
+]

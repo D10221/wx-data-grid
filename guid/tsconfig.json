@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "sourceMap": true,
+    "outDir": "../built",
+    "declaration": true
+  },
+  "exclude": [
+    "../node_modules"
+  ],
+  "files": [
+    "./guid.ts"
+  ]
+}

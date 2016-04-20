@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "noImplicitAny": false,
+        "sourceMap": true,
+        "outFile": "built/main.js"
+    },
+    "exclude": [
+        "node_modules", "built"
+    ]
+}

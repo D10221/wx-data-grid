@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="main-view">
+    <div>
+        <span data-bind="text: @brand"></span>
+    </div>
+    <div data-bind="component: { name: 'data-table' , params: { items: items} }"></div>
+
+</div>
+
+<style>
+    .selected {
+        background: green;
+    }
+</style>
+<template id="data-table-template">
+    <table style="border: solid black">
+        <thead>
+            <tr data-bind="foreach: columns">
+                <th style="border: solid black;" >
+                    <div >
+                        <span data-bind="text: header"></span>
+                        <div style="display: flex">
+                            <div>
+                                <input type="text" data-bind="value: @filterTxt"/>
+                            </div>
+                            <button data-bind="
+                                text: order == 'asc' ? '\u25B2' : '\u25BC' ,
+                                command: toggleOrder,
+                                visible: @canSort"/>
+                        </div>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: rows">
+            <tr style="border: solid black;" data-bind="foreach: values, css:{ selected: selected }, visible: @visible">
+                <!--for e/dataSource create a row -->
+                <td style="border: solid black;">
+                    <input data-bind="value: @value, attr: { type: getInputType() }"/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</template>
+
+<script src="../node_modules/lodash/lodash.js" ></script>
+<script src="../node_modules/rx/dist/rx.all.js" ></script>
+<script src="../node_modules/webrx/dist/web.rx.js" ></script>
+<script src="../built/guid.js"></script>
+<script src="../built/main.js"></script>
+</body>
+</html>
