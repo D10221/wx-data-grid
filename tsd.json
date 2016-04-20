@@ -10,6 +10,15 @@
     },
     "moment/moment-node.d.ts": {
       "commit": "544a35a10866b32afda9c7f029c0764558563f4f"
+    },
+    "lodash/lodash.d.ts": {
+      "commit": "544a35a10866b32afda9c7f029c0764558563f4f"
+    },
+    "whatwg-fetch/whatwg-fetch.d.ts": {
+      "commit": "544a35a10866b32afda9c7f029c0764558563f4f"
+    },
+    "es6-promise/es6-promise.d.ts": {
+      "commit": "544a35a10866b32afda9c7f029c0764558563f4f"
     }
   }
 }
