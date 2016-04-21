@@ -14,52 +14,14 @@
 
 </div>
 
-<template id="data-table-template">
-    <table>
-        <thead>
-            <tr data-bind="foreach: columns">
-                <th >
-                    <div >
-                        <span data-bind="text: header"></span>
-                        <div style="display: flex">
-                            <div data-bind="visible: canFilter">
-                                <input type="text" data-bind="value: @filterTxt"/>
-                            </div>
-                            <button data-bind="
-                                text: order == 'asc' ? '\u25B2' : '\u25BC' ,
-                                command: toggleOrder,
-                                visible: @canSort" />
-                        </div>
-                    </div>
-                </th>
-            </tr>
-        </thead>
-        <tbody data-bind="foreach: rows">
-            <tr data-bind="css: { 'row-selected': @isSelected }, visible: @visible, foreach: cells">
-                <!--CELL-->
-                <td data-bind="css: { 'cell-dirty' : @isDirty }" >
-                    <div style="display: flex">
-                        <div data-bind="if: isInputTypeOf('checkbox') ">
-                            <input data-bind="attr: { type: getInputType() }, checked: @value"/>
-                        </div>
-                        <div data-bind="ifnot: isInputTypeOf('checkbox')">
-                            <input data-bind="value: @value, attr: { type: getInputType() }"/>
-                        </div>
-                        <div data-bind="visible: @isDirty" class="tooltip">
-                            <span class="tooltiptext">Undo</span>
-                            <button data-bind="command: revertCmd"> &#x27F3 </button>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</template>
+<link rel="import" href="table-template.html" id="wx-data-table-templates">
+
 <script src="../node_modules/moment/moment.js"></script>
 <script src="../node_modules/lodash/lodash.js" ></script>
 <script src="../node_modules/rx/dist/rx.all.js" ></script>
 <script src="../node_modules/webrx/dist/web.rx.js" ></script>
 <script src="../built/guid.js"></script>
+<script src="../built/wx-data-grid.js"></script>
 <script src="../built/main.js"></script>
 </body>
 </html>
