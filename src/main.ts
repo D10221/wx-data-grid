@@ -2,33 +2,68 @@
 ///<reference path="references.d.ts"/>
 ///<reference path="../typings/tsd.d.ts"/>
 
-interface DataSource {
-    //required
-    key:string ;
 
-    urls : {
-        //required
-        getter: string
+function renewSubscription(target: Rx.CompositeDisposable, ... disposables: Rx.IDisposable[] ){
+    if(target){ target.dispose() ; }
+    target = new Rx.CompositeDisposable();
+    for( var disposable of disposables){
+        target.add(disposable);
     }
-
-    columnMaps?:ColumnMap[];
-    /***
-     * Has to be populated here,
-     */
-    items?:wx.IObservableList<{}>;
 }
 
 class MainViewModel {
 
     brand = wx.property('tiny-x');
 
-    //items = wx.list();
-
-    dataSource = wx.property<DataSource>();
-
     dataSources = wx.list<DataSource>();
 
+    dataSource = wx.property<DataSource> ();
+
+    context = wx.property<DataTableContext>();
+
+    // conetxtUpdate = (dataSource)=>{
+    //     this.context({ dataSource: dataSource} );
+    // };
+
+    /***
+     * When TableVm gets its context calls hook(this)
+     * @param sender
+     */
+    hook(sender:TableVm){
+        
+        renewSubscription(this.hookSubscriptions,
+            //* rowSelectionChanged
+            sender.when("rowSelectionChanged").subscribe( kv => {
+                // On Current Row Changed
+                console.log(kv.value);
+            }),
+            //*
+            sender.when( /*key:*/ "preBindingInit", /*action:*/  kv=> {
+                // Do Something before binding
+                console.log('table preBindingInit');
+                console.log(kv.value);
+            })
+            ,
+            //*
+            sender.events.changed.where(e=> e.key == "postBindingInit").subscribe( kv=> {
+                // Do Something after binding
+                console.log('table postBindingInit');
+                console.log(kv.value);
+            })
+        );
+        
+        //Bad Idea , but it might be needed 
+        this.tableView = sender.view;
+    };
+    
+    //Bad Idea , but it might be needed
+    tableView:HTMLElement;
+    
+    hookSubscriptions = new Rx.CompositeDisposable();
+    
     constructor() {
+
+        this.context(this);
 
         fetch('../data/datasource.json').then(r=>r.json()).then( (sources: DataSource[]) =>{
             for(var source of sources){
@@ -60,8 +95,18 @@ class MainViewModel {
 
         this.dataSource.changed.subscribe(()=> {
             load();
+            this.updateBindings();
+
         });
 
+    }
+    private updateBindings() {
+        // Change Instance so wx gets notified of the change
+        // doing context(this) , does not trigger change
+        this.context({
+            dataSource: this.dataSource,
+            hook: this.hook
+        });
     }
 }
 
@@ -78,7 +123,9 @@ var template = templates.getElementById('data-table-template');
 
 wx.app.component('data-table', {
     template: template.innerHTML,
-    viewModel: (params:TableVmParams)=> new TableVm(params)
+    viewModel: (params:DataTableContext)=> new TableVm(params),
+    preBindingInit : 'preBindingInit' , 
+    postBindingInit : 'postBindingInit' 
 });
 
 wx.applyBindings(new MainViewModel(), document.getElementById('main-view'));

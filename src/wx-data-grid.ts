@@ -160,19 +160,34 @@ class Column implements Rx.IDisposable {
     }
 }
 
-class TableVm {
+class TableVm implements  Rx.IDisposable {
 
     rows = wx.list<Row>();
 
     columns = wx.list<Column>();
 
-    constructor(private params:TableVmParams) {
+    private rowSelectionChanged(){
+        this.events({key: "rowSelectionChanged", value: this.rows.filter(row=> row.isSelected())})
+    }
 
-        params.items.listChanged.subscribe(()=> {
+    constructor(private context:DataTableContext) {
 
+        if(!context) return;
+        context.hook(this);
+
+        var dataSource = context.dataSource;
+        if(!dataSource) return;
+
+        var items = dataSource().items;
+        if(!items ) return;
+
+        var columnMaps = dataSource().columnMaps;
+        
+        items.listChanged.subscribe(()=> {
+    
             this.columns.clear();
 
-            var first = this.params.items.toArray()[0];
+            var first = items.toArray()[0];
             { // extra column
                 var column = new Column('isSelected','\u273D');
                 column.canSort(false);
@@ -186,8 +201,8 @@ class TableVm {
             // not reliable
             for (var key in first) {
                 var column = new Column(key);
-                if(params.columnMaps ){
-                    var map = _.find(params.columnMaps, m=> m.key == key);
+                if(columnMaps ){
+                    var map = _.find(columnMaps, m=> m.key == key);
                     if(map){
                         column.header = map.displayName;
                         column.inputType = map.inputType;
@@ -208,7 +223,7 @@ class TableVm {
 
             //Rows : is Cell[]
             var columns = this.columns.toArray();
-            this.rows.addRange(this.params.items.map(x=> {
+            this.rows.addRange(items.map(x=> {
 
                 var row = new Row();
 
@@ -239,6 +254,11 @@ class TableVm {
 
                     row.cells.push(cell);
                 }
+
+                this._disposables.add(
+                    row.isSelected.changed.subscribe(()=> this.rowSelectionChanged())
+                );
+
                 return row;
             }));
         })
@@ -284,4 +304,51 @@ class TableVm {
         }
         throw "unkown sort method";
     }
+
+    events = wx.property<KeyVaue>();
+
+    view: HTMLElement;
+
+    /***
+     * wx: searchs for properties:
+     *  (e:HTMLElement)=> void
+     * @param e
+     */
+    preBindingInit: any = (e:HTMLElement)=> {
+        this.events( { key: 'preBindingInit', value: e});
+        this.view = e;
+    }
+
+    /***
+     * wx: searchs for properties:
+     *  (e:HTMLElement)=> void 
+     * @param e
+     */
+    postBindingInit: any = (e:HTMLElement)=> {
+        this.events( { key: 'postBindingInit', value: e});
+        this.view = e;
+    }
+
+    private _disposables = new Rx.CompositeDisposable();
+
+    dispose(){
+        this._disposables.dispose();
+    }
+
+    /***
+     * if action provided returns  Idisposable, if No Action provided returns Observable<KeyValue>
+     * @param params
+     * @returns {any}
+     */
+    when( key: string):  Rx.Observable<KeyVaue> ;
+    when( key: string, action? : (kv: KeyVaue)=> void  ):  Rx.IDisposable ;
+    when( key: string, action? : (kv: KeyVaue)=> void  ):  any {
+        if(!action) {
+            return this.events.changed.where(e=> e.key == key);
+        }
+        return this.events.changed.where(e=> e.key == key).subscribe(action);
+
+    }
+
+
 }

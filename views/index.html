@@ -44,8 +44,8 @@
             </select>
         </div>
     </div>
-    <div data-bind="with: @dataSource">
-        <div  data-bind="component: { name: 'data-table' , params: { items: items, columnMaps: columnMaps} }"></div>
+    <div data-bind="with: @context">
+        <div  data-bind="component: { name: 'data-table' , params: $data }"></div>
     </div>
 </main>
 
