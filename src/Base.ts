@@ -1,7 +1,27 @@
+
+export interface KeyVaue {
+    key:string;
+    value:any;
+}
+
+export interface  iHTMLTemplateElement extends  HTMLTemplateElement {
+    import: Document
+}
+
+
+export class InputTypes  {
+
+    static values: string [] = ['date', 'number', 'text', 'checkbox'];
+
+    static any(inputType: string) : boolean  {
+        return inputType && _.find(InputTypes.values, x=> x == inputType) ? true : false;
+    }
+}
+
 /***
  * https://github.com/danylaporte/Rebuild-Framework/blob/master/Rebuild.TypeScript/guid.ts
  */
-class Guid {
+export class Guid {
     private id: string;
     private static emptyGuid = new Guid("00000000-0000-0000-0000-000000000000");
     constructor(id: string) {

@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -fr ./built && rm -fr ./dist",
+    "build": "tsc -p src",
+    "rebuild": "npm run clean && npm run build",
+    "bundle-app": "webpack"
   },
   "author": "",
   "license": "ISC",

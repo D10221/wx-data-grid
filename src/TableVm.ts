@@ -1,173 +1,17 @@
-///<reference path="../built/guid.d.ts"/>
-///<reference path="references.d.ts"/>
-///<reference path="../typings/tsd.d.ts"/>
 
-import IObservableList = wx.IObservableList;
-
-class Cell implements Rx.IDisposable {
-
-    isDirty = wx.property(false) ;
-
-    isDirtyCheckEnable = true;
-
-    revertCmd = wx.command(()=> this.value(this._value));
-
-    _disposables = new Rx.CompositeDisposable();
-
-    constructor(public key:string, private _value:any) {
-
-        this.value = wx.property(_value);
-
-        this._disposables.add(
-            this.value.changed
-                .where(e => this.isDirtyCheckEnable)
-                .subscribe(e=> this.isDirty(_value != e))
-        );
-    }
-
-    value:wx.IObservableProperty<any>;
-
-    selected = wx.property(false);
-
-    toggleSelected = wx.command(()=> this.selected(!this.selected()));
-
-    inputType: string;
-
-    /***
-     *  HTMLInputElement type
-     * @returns {string}
-     */
-    getInputType():string {
-
-        // Override ?
-        if (InputTypes.any(this.inputType)) {
-            return this.inputType;
-        }
-
-        var value = this.value();
-
-        if ( _.isDate(value)) return "date";
-        if (_.isNumber(value)) return "number";
-        if (_.isBoolean(value)) return "checkbox";
-        return "text";
-    }
-
-
-    isInputTypeOf(type:string):boolean {
-        return this.getInputType() == type;
-    }
-
-    dispose(){
-        this._disposables.dispose();
-    }
-}
-
-class Row {
-
-    cells = wx.list<Cell>();
-
-    constructor(_values:Cell[] = null) {
-        if (_values) {
-            this.cells.addRange(_values);
-        }
-    }
-
-    isSelected = wx.property(false);
-
-    toggleSelected = wx.command(()=> this.isSelected(!this.isSelected()));
-
-    visible = wx.property(true);
-
-    findCellByKey:(key:string)=> Cell = (key) => {
-        return _.find(this.cells.toArray(), cell => cell.key == key);
-    };
-
-    findCellValueByKey:(key:string)=> any = (key) => {
-        var cell = _.find(this.cells.toArray(), cell => cell.key == key);
-        return cell ? cell.value() : null;
-    };
-
-    /***
-     * Set this.visible == true cell with key value;s to string matches regex
-     * @param kv
-     */
-    setVisble(kv:KeyVaue) {
-        var txt = this.findCellValueByKey(kv.key)
-            .toString();
-        var ok = new RegExp(kv.value).test(txt);
-        this.visible(ok);
-    }
-}
-
-class InputTypes  {
-
-    static values: string [] = ['date', 'number', 'text', 'checkbox'];
-
-    static any(inputType: string) : boolean  {
-        return inputType && _.find(InputTypes.values, x=> x == inputType) ? true : false;
-    }
-}
-
-
-class Column implements Rx.IDisposable {
-
-    id = Guid.newGuid();
-
-    constructor(public key:string, public header?:string) {
-        this.header = header || key;
-    }
-
-    converter: wx.IExpressionFilter;
-
-    inputType:string;
-    isUnbound = false;
-    /***
-     * 'desc' || 'asc'
-     * @type {IObservableProperty<string>}
-     */
-    order = wx.property('desc');
-
-    toggleOrder = wx.command(()=> this.order(this.order() == 'desc' ? 'asc' : 'desc'));
-
-    canSort = wx.property(true);
-
-    browsable:boolean = true;
-
-    get orderChanged():Rx.Observable<KeyVaue> {
-        return this
-            .order
-            .changed
-            .where(x=> this.canSort())
-            .select(() => {
-                return {key: this.key, value: this.order()}
-            });
-    }
-
-    filterTxt = wx.property("");
-    canFilter = true;
-
-    get filterTxtChanged():Rx.Observable<KeyVaue> {
-        return this
-            .filterTxt
-            .changed
-            .select( () => {
-                return {key: this.key, value: this.filterTxt()}
-            });
-    }
-
-    dispose() {
-        this.order.dispose();
-    }
-}
-
-class TableVm implements  Rx.IDisposable {
+import {KeyVaue, InputTypes} from './Base';
+import Column from './Column';
+import {Row} from './Row';
+import {Cell} from './Cell';
+import {DataTableContext} from "./deninitions";
+export class TableVm implements  Rx.IDisposable {
 
     rows = wx.list<Row>();
 
     columns = wx.list<Column>();
 
     private rowSelectionChanged(){
-        this.events({key: "rowSelectionChanged", value: this.rows.filter(row=> row.isSelected())})
+        this.events({key: 'rowSelectionChanged', value: this.rows.filter(row=> row.isSelected())})
     }
 
     constructor(private context:DataTableContext) {
@@ -182,9 +26,9 @@ class TableVm implements  Rx.IDisposable {
         if(!items ) return;
 
         var columnMaps = dataSource().columnMaps;
-        
+
         items.listChanged.subscribe(()=> {
-    
+
             this.columns.clear();
 
             var first = items.toArray()[0];
@@ -302,7 +146,7 @@ class TableVm implements  Rx.IDisposable {
 
             return;
         }
-        throw "unkown sort method";
+        throw 'unkown sort method';
     }
 
     events = wx.property<KeyVaue>();
@@ -321,7 +165,7 @@ class TableVm implements  Rx.IDisposable {
 
     /***
      * wx: searchs for properties:
-     *  (e:HTMLElement)=> void 
+     *  (e:HTMLElement)=> void
      * @param e
      */
     postBindingInit: any = (e:HTMLElement)=> {

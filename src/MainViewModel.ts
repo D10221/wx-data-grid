@@ -1,7 +1,4 @@
-///<reference path="deninitions.ts"/>
-///<reference path="references.d.ts"/>
-///<reference path="../typings/tsd.d.ts"/>
-
+import {DataSource, DataTableContext, Table} from "./deninitions";
 
 function renewSubscription(target: Rx.CompositeDisposable, ... disposables: Rx.IDisposable[] ){
     if(target){ target.dispose() ; }
@@ -11,7 +8,7 @@ function renewSubscription(target: Rx.CompositeDisposable, ... disposables: Rx.I
     }
 }
 
-class MainViewModel {
+export class MainViewModel {
 
     brand = wx.property('tiny-x');
 
@@ -29,8 +26,8 @@ class MainViewModel {
      * When TableVm gets its context calls hook(this)
      * @param sender
      */
-    hook(sender:TableVm){
-        
+    hook(sender:Table){
+
         renewSubscription(this.hookSubscriptions,
             //* rowSelectionChanged
             sender.when("rowSelectionChanged").subscribe( kv => {
@@ -51,16 +48,16 @@ class MainViewModel {
                 console.log(kv.value);
             })
         );
-        
+
         //Bad Idea , but it might be needed 
         this.tableView = sender.view;
     };
-    
+
     //Bad Idea , but it might be needed
     tableView:HTMLElement;
-    
+
     hookSubscriptions = new Rx.CompositeDisposable();
-    
+
     constructor() {
 
         this.context(this);
@@ -110,22 +107,3 @@ class MainViewModel {
     }
 }
 
-wx.app.devModeEnable();
-
-wx.app.filter('string-to-date-converter', function (input:string) {
-    return input;//? moment(input).toDate() : null;
-});
-
-
-var templates = (<iHTMLTemplateElement>document.getElementById('wx-data-table-templates')).import;
-
-var template = templates.getElementById('data-table-template');
-
-wx.app.component('data-table', {
-    template: template.innerHTML,
-    viewModel: (params:DataTableContext)=> new TableVm(params),
-    preBindingInit : 'preBindingInit' , 
-    postBindingInit : 'postBindingInit' 
-});
-
-wx.applyBindings(new MainViewModel(), document.getElementById('main-view'));

@@ -1,8 +1,21 @@
-interface  iHTMLTemplateElement extends  HTMLTemplateElement {
-    import: Document
+import {KeyVaue} from "./Base";
+
+export interface IHaveEvents {
+    /***
+     * if action provided returns  Idisposable, if No Action provided returns Observable<KeyValue>
+     * @param params
+     * @returns {any}
+     */
+    when( key: string):  Rx.Observable<KeyVaue> ;
+    when( key: string, action? : (kv: KeyVaue)=> void  ):  Rx.IDisposable ;
+    events : wx.IObservableProperty<KeyVaue>;
 }
 
-interface DataTableContext {
+export interface Table extends IHaveEvents, Rx.IDisposable {
+    view:HTMLElement;
+}
+
+export interface DataTableContext {
 
     dataSource : wx.IObservableProperty<DataSource>;
     /***
@@ -12,28 +25,18 @@ interface DataTableContext {
      * TODO: TableVm should be an interface
      * @param receiver
      */
-    hook(me: TableVm);
+    hook(me: Table);
 }
 
-// interface TableVmParams {
-//     // items:wx.IObservableList<{}>;
-//     // columnMaps?:ColumnMap[];
-//     context: DataContext ;
-// }
-
-interface ColumnMap {
+export interface ColumnMap {
     key:string,
     displayName?:string;
     inputType?:string;
     converter?: string
 }
 
-interface KeyVaue {
-    key:string;
-    value:any;
-}
 
-interface DataSource {
+export interface DataSource {
     //required
     key:string ;
 

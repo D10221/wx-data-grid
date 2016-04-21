@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
+    "noImplicitAny": false,
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "noImplicitReturns": true,
+    "rootDir": "../src",
+    "module": "commonjs",
     "target": "es5",
     "sourceMap": true,
     "outDir": "../built",
     "declaration": true
   },
   "exclude": [
-    "../node_modules"
-  ],
-  "files": [
-    "wx-data-grid.ts","./main.ts"
+    "../node_modules","../built", "../dist"
   ]
 }
