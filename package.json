@@ -14,5 +14,8 @@
     "rx": "^4.1.0",
     "webrx": "^1.5.0",
     "whatwg-fetch": "^0.11.0"
+  },
+  "devDependencies": {
+    "material-design-lite-oob": "git+https://git@github.com/D10221/material-design-lite-oob.git"
   }
 }

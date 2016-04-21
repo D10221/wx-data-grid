@@ -1,0 +1,28 @@
+[
+  {
+    "key" : "materials" ,
+    "urls": {
+      "getter": "../data/materials.json"
+    },
+    "columnMaps" : [
+      {
+        "key": "created",
+        "displayName": "Created",
+        "inputType": "date",
+        "converter": "string-to-date-converter"
+      },
+      {
+        "key": "modified",
+        "displayName": "Modified",
+        "inputType": "date",
+        "converter": "string-to-date-converter"
+      }
+    ]
+  },
+  {
+    "key" : "materials(no column Maps)" ,
+    "urls": {
+      "getter" : "../data/materials_two.json"
+    }
+  }
+]

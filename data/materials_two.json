@@ -1,0 +1,29 @@
+[
+  {
+    "material": "Acrylic (RED)",
+    "quantity" : 11,
+    "unitPrice": 2.90,
+    "tax": 1.14 ,
+    "discounted": true,
+    "created" : "2012-04-04",
+    "modified": "2012-04-04"
+  },
+  {
+    "material": "Cork",
+    "quantity" : 55,
+    "unitPrice": 1.25,
+    "tax": 1.14,
+    "discounted": false,
+    "created" : "2012-04-04",
+    "modified": "2012-04-04"
+  },
+  {
+    "material": "Glass",
+    "quantity" : 100,
+    "unitPrice": 110.3,
+    "tax": 1.14,
+    "discounted": true,
+    "created" : "2012-04-04",
+    "modified": "2012-04-04"
+  }
+]
