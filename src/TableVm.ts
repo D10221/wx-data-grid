@@ -110,18 +110,11 @@ export class TableVm extends ViewModelBase implements Table  {
                 if( this.options.showRowSelector) { // inbuilt cells 
                     var selector = new Cell('isSelected', false);
                     selector.isDirtyCheckEnable = false;
-                    this.toBeDispose(
-                        selector.value.changed.subscribe((x)=> {
-                            row.isSelected(x == 'true' || x == true);
-                        })
-                    );
-                    this.toBeDispose(
-                        row.isSelected
-                            .changed
-                            .where(x=> row.isSelected()!= selector.value())
-                            .subscribe(()=>{
-                                selector.value(row.isSelected())
-                            })
+
+                    this.addTwoWaySubscribtion(
+                        selector.value,
+                        row.isSelected,
+                        this
                     );
                     row.cells.push(selector);
                 }

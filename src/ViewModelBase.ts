@@ -28,5 +28,23 @@ export default class ViewModelBase implements Rx.IDisposable {
         return this.events.changed.where(e=> e.key == key).subscribe(action);
 
     }
+    addTwoWaySubscribtion<T>(left: wx.IObservableProperty<T>, right: wx.IObservableProperty<T>, vm?: ViewModelBase): void {
+        
+        (vm|| this).toBeDispose(this.twoWaySubscribtion(left,right))
+    }
+    
+    twoWaySubscribtion<T>(left: wx.IObservableProperty<T>, right: wx.IObservableProperty<T>): Rx.IDisposable {
+        
+        var disposables = new Rx.CompositeDisposable();
+        
+        disposables.add(
+            left.changed.where(value=> value != right()).subscribe( value=> right(value))
+        );
+        
+        disposables.add(
+            right.changed.where( value=> value!= left()).subscribe(value=> left(value))
+        );
+        return disposables;
+    }
 
 }
