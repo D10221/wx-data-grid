@@ -25,6 +25,13 @@ class App {
 
         wx.app.component('data-table', DataTable(template.innerHTML));
 
+        wx.app.component('wx-checkbox', {
+            template: templates.getElementById('wx-data-table-checkbox-template').innerHTML,
+            // viewModel: (params)=> {
+            //     return params;
+            // }
+        });
+
         wx.applyBindings(new MainViewModel(), document.getElementById('main-view'));
     }
 }

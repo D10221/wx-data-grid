@@ -1,6 +1,7 @@
+///<reference path="app.definitions.d.ts"/>
+
 import {DataSource, TableContext, Table} from "./definitions";
 import {renewSubscription } from "./Base";
-
 
 export class MainViewModel {
 
@@ -21,21 +22,22 @@ export class MainViewModel {
         renewSubscription(this.hookSubscriptions,
             //* rowSelectionChanged
             sender.when("rowSelectionChanged").subscribe( kv => {
-                // On Current Row Changed
+                // On Current Row Changed, selected rows  
                 console.log(kv.value);
             }),
             //*
             sender.when( /*key:*/ "preBindingInit", /*action:*/  kv=> {
                 // Do Something before binding
                 console.log('table preBindingInit');
-                console.log(kv.value);
+                //console.log(kv.value);
             })
             ,
             //*
             sender.events.changed.where(e=> e.key == "postBindingInit").subscribe( kv=> {
                 // Do Something after binding
                 console.log('table postBindingInit');
-                console.log(kv.value);
+                //console.log(kv.value);
+                componentHandler.upgradeAllRegistered();
             })
         );
 

@@ -3,9 +3,11 @@
 
 import IObservableList = wx.IObservableList;
 
-import {InputTypes} from "./Base";
+import {InputTypes, Guid} from "./Base";
 
 export class Cell implements Rx.IDisposable {
+
+    id =  Guid.newGuid();
 
     isDirty = wx.property(false) ;
 
@@ -27,6 +29,12 @@ export class Cell implements Rx.IDisposable {
     }
 
     value:wx.IObservableProperty<any>;
+    
+    /***
+     * easy booelan toggle 
+     * @type {ICommand<any>}
+     */
+    toggleValue = wx.command(()=> this.value(!this.value()));
 
     selected = wx.property(false);
 
@@ -52,8 +60,7 @@ export class Cell implements Rx.IDisposable {
         if (_.isBoolean(value)) return "checkbox";
         return "text";
     }
-
-
+    
     isInputTypeOf(type:string):boolean {
         return this.getInputType() == type;
     }

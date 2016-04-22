@@ -163,8 +163,8 @@ export class TableVm extends ViewModelBase implements Table  {
      * @param e
      */
     preBindingInit: any = (e:HTMLElement)=> {
-        this.events( { key: 'preBindingInit', value: e});
         this.view = e;
+        this.events( { key: 'preBindingInit', value: e});
     }
 
     /***
@@ -173,8 +173,8 @@ export class TableVm extends ViewModelBase implements Table  {
      * @param e
      */
     postBindingInit: any = (e:HTMLElement)=> {
-        this.events( { key: 'postBindingInit', value: e});
         this.view = e;
+        this.events( { key: 'postBindingInit', value: e});
     }
 
     
