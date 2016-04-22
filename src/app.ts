@@ -4,7 +4,7 @@
 import {MainViewModel} from "./MainViewModel";
 import {DataTable} from "./Components";
 import {iHTMLTemplateElement} from "./Base";
-import ViewModelBase from "./ViewModelBase";
+import {CheckBoxViewModel, CheckBoxViewModelByKey, ChekBoxContext, ChekBoxKeyContext} from './CheckBoxViewModel'
 
 class App {
 
@@ -37,7 +37,14 @@ class App {
         
         wx.app.component('wx-checkbox', {
             template: templates.getElementById('wx-checkbox-template').innerHTML,
-            // viewModel: (params: Toggleable)=> new CheckBoxViewModel(params)
+            // using the vm the templates dont need to know command key, can use 'command'
+            viewModel: (params: ChekBoxContext)=> new CheckBoxViewModel(params)
+        });
+
+        wx.app.component('wx-checkbox-by-key', {
+            template: templates.getElementById('wx-checkbox-template').innerHTML,
+            // using the vm the templates dont need to know command key, can use 'command'
+            viewModel: (params: ChekBoxKeyContext)=> new CheckBoxViewModelByKey(params)
         });
 
         wx.applyBindings(new MainViewModel(), document.getElementById('main-view'));

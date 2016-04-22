@@ -1,7 +1,8 @@
 import {KeyVaue} from "./Base";
+import {IHaveEvents} from "./definitions";
 
-export default class ViewModelBase implements Rx.IDisposable {
-
+export default class ViewModelBase implements Rx.IDisposable , IHaveEvents {
+    
     private _disposables = new Rx.CompositeDisposable();
 
     protected toBeDispose:(...d: Rx.IDisposable[] )=>void  = (d:Rx.IDisposable) => {

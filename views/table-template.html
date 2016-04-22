@@ -37,6 +37,7 @@
                             name:'wx-checkbox',
                             params: $data
                         }"></div>
+                        <!--<div data-bind="component: { name: 'wx-checkbox-by-key' , params: { context: $data, key: 'value' } }"></div>-->
                     </div>
                     <!--Text Field-->
                     <div data-bind="ifnot: isInputTypeOf('checkbox')">
@@ -71,12 +72,13 @@
 </template>
 
 <template id="wx-checkbox-template">
-    <!--DataContext: { value: voolean , toggleValue: command} -->
+    <!--DataContext: { value: wx.IObservableProperty>boolean> } -->
     <button class="mdl-button mdl-button--icon"
-            data-bind="command: toggleValue">
+            data-bind="command: command">
         <i class="material-icons" data-bind="text: value | toggleCheckFilter "></i>
     </button>
 </template>
+
 <template id="data-table-template">
     <table>
         <thead>

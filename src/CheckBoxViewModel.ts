@@ -1,11 +1,12 @@
 
 import ViewModelBase from "./ViewModelBase";
-interface Toggleable {
+
+
+export interface ChekBoxContext {
     value: wx.IObservableProperty<boolean> ;
-    toggleValue : wx.ICommand<any>;
 }
 
-class CheckBoxViewModel extends ViewModelBase{
+export class CheckBoxViewModel extends ViewModelBase{
 
     value= wx.property(false);
 
@@ -14,26 +15,40 @@ class CheckBoxViewModel extends ViewModelBase{
         this.context.value(this.value());
     });
 
-    constructor(private context: Toggleable) {
+    constructor(private context: ChekBoxContext) {
         super();
+        this.value = context.value;
+    }
 
-        this.value(context.value());
+}
 
-        this.toBeDispose(
-            context.value.changed.where(x=> context.value()!= this.value()).subscribe(()=>{
+export interface ChekBoxKeyContext {
 
-                console.log(`CheckBoxViewModel: context.value.changed ${context.value.changed}`);
+    context: {};
+    
+    /***
+     * Where key: prop name for wx.IObservableProperty<boolean>
+     */
+    key: string;
+}
 
-                this.value(context.value());
-            })
-        );
+export class CheckBoxViewModelByKey extends ViewModelBase{
 
-        this.toBeDispose(
-            (<ViewModelBase>(<any>context)).events.changed.subscribe( e=> {
-                console.log(`ChekBoxViewModel: context-event: { key: ${e.key}, value: ${e.value} }`);
-            })
-        );
+    value= wx.property(false);
 
+    command =  wx.command( () => {
+        this.value(!this.value());
+        //this.params.context[this.params.key] = this.value(); 
+    });
+
+    constructor(private params: ChekBoxKeyContext) {
+        super();
+        
+        this.addTwoWaySubscribtion(
+            this.value,
+            <wx.IObservableProperty<boolean>>(params.context[params.key]), 
+            this);
+        
     }
 
 }

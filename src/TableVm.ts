@@ -121,20 +121,32 @@ export class TableVm extends ViewModelBase implements Table  {
                 
                 
                 for (var key in x) {
-                    // ** filter out c ell by column
-                    var c = _.find(columns, c=> c.key == key);
-                    if (!c || !c.browsable) {
+
+                    // ** filter out column ell by column
+                    var column = _.find(columns, c=> c.key == key);
+
+                    if (!column || !column.browsable) {
                         continue
                     }
+
                     //** new cell
-                    var value = c.converter ? c.converter(x[key]) : x[key] ;
+                    var value = column.converter ? column.converter(x[key]) : x[key] ;
                     var cell = new Cell(key, value);
 
                     // Override:  by settings , config ... etc
-                    if (InputTypes.any(c.inputType)) {
-                        cell.inputType = c.inputType;
+                    if (InputTypes.any(column.inputType)) {
+                        cell.inputType = column.inputType;
                     }
-                    // if(c.isUnbound){
+
+                    // OPTION ? 
+                    // var map = _.find(columnMaps, m=> m.key == key);
+                    // if(map && map.cellTemplate) {
+                    //     cell.template = map.template ;
+                    // }
+
+
+
+                    // if(column.isUnbound){
                     //     cell.isDirtyCheckEnable = false;
                     // }
 

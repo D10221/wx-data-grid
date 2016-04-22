@@ -7,15 +7,7 @@ import {InputTypes, Guid} from "./Base";
 import ViewModelBase from "./ViewModelBase";
 
 export class Cell extends ViewModelBase {
-
-    id =  Guid.newGuid();
-
-    isDirty = wx.property(false) ;
-
-    isDirtyCheckEnable = true;
-
-    revertCmd = wx.command(()=> this.value(this._value));
-    
+   
     constructor(public key:string, private _value:any) {
         
         super();
@@ -34,7 +26,18 @@ export class Cell extends ViewModelBase {
         ));
     }
 
+
+    id =  Guid.newGuid();
+
+    isDirty = wx.property(false) ;
+
+    isDirtyCheckEnable = true;
+
+    revertCmd = wx.command(()=> this.value(this._value));
+
     value:wx.IObservableProperty<any>;
+    
+    template: string;
     
     /***
      * easy booelan toggle 
