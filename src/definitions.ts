@@ -15,7 +15,7 @@ export interface Table extends IHaveEvents, Rx.IDisposable {
     view:HTMLElement;
 }
 
-export interface DataTableContext {
+export interface TableContext {
 
     dataSource : wx.IObservableProperty<DataSource>;
     /***

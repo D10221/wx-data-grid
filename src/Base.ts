@@ -18,6 +18,14 @@ export class InputTypes  {
     }
 }
 
+export function renewSubscription(target: Rx.CompositeDisposable, ... disposables: Rx.IDisposable[] ){
+    if(target){ target.dispose() ; }
+    target = new Rx.CompositeDisposable();
+    for( var disposable of disposables){
+        target.add(disposable);
+    }
+}
+
 /***
  * https://github.com/danylaporte/Rebuild-Framework/blob/master/Rebuild.TypeScript/guid.ts
  */

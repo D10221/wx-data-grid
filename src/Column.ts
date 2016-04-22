@@ -22,7 +22,11 @@ export default class Column implements Rx.IDisposable {
     toggleOrder = wx.command(()=> this.order(this.order() == 'desc' ? 'asc' : 'desc'));
 
     canSort = wx.property(true);
-
+    
+    isSortVisible = wx.property(false);
+    
+    toggleSearchVisible = wx.command(()=> this.isSortVisible(!this.isSortVisible()));
+    
     browsable:boolean = true;
 
     get orderChanged():Rx.Observable<KeyVaue> {

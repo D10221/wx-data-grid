@@ -1,6 +1,6 @@
 
 import {TableVm} from "./TableVm";
-import {DataTableContext} from "./deninitions";
+import {TableContext} from "./definitions";
 import IComponentDescriptor = wx.IComponentDescriptor;
 import IComponentTemplateDescriptor = wx.IComponentTemplateDescriptor;
 
@@ -13,7 +13,7 @@ import IComponentTemplateDescriptor = wx.IComponentTemplateDescriptor;
 export function  DataTable(template: string|Node[]|IComponentTemplateDescriptor|((params?: any)=> string|Node[]|Rx.Observable<Node[]>)): IComponentDescriptor {
     return {
         template: template,
-        viewModel: (params:DataTableContext)=> new TableVm(params),
+        viewModel: (params:TableContext)=> new TableVm(params),
         preBindingInit : 'preBindingInit' ,
         postBindingInit : 'postBindingInit'
     }

@@ -9,7 +9,8 @@
     "clean": "rm -fr ./built && rm -fr ./dist",
     "build": "tsc -p src",
     "rebuild": "npm run clean && npm run build",
-    "bundle-app": "webpack"
+    "bundle-app": "webpack",
+    "re-bundle-app": "npm run rebuild; webpack"
   },
   "author": "",
   "license": "ISC",

@@ -1,12 +1,6 @@
-import {DataSource, DataTableContext, Table} from "./deninitions";
+import {DataSource, TableContext, Table} from "./definitions";
+import {renewSubscription } from "./Base";
 
-function renewSubscription(target: Rx.CompositeDisposable, ... disposables: Rx.IDisposable[] ){
-    if(target){ target.dispose() ; }
-    target = new Rx.CompositeDisposable();
-    for( var disposable of disposables){
-        target.add(disposable);
-    }
-}
 
 export class MainViewModel {
 
@@ -16,11 +10,7 @@ export class MainViewModel {
 
     dataSource = wx.property<DataSource> ();
 
-    context = wx.property<DataTableContext>();
-
-    // conetxtUpdate = (dataSource)=>{
-    //     this.context({ dataSource: dataSource} );
-    // };
+    context = wx.property<TableContext>();
 
     /***
      * When TableVm gets its context calls hook(this)
@@ -92,17 +82,17 @@ export class MainViewModel {
 
         this.dataSource.changed.subscribe(()=> {
             load();
-            this.updateBindings();
+            this.updateContext(this);
 
         });
 
     }
-    private updateBindings() {
+    private updateContext(context:TableContext) {
         // Change Instance so wx gets notified of the change
         // doing context(this) , does not trigger change
         this.context({
-            dataSource: this.dataSource,
-            hook: this.hook
+            dataSource: context.dataSource,
+            hook: context.hook
         });
     }
 }

@@ -3,8 +3,10 @@ import {KeyVaue, InputTypes} from './Base';
 import Column from './Column';
 import {Row} from './Row';
 import {Cell} from './Cell';
-import {DataTableContext} from "./deninitions";
-export class TableVm implements  Rx.IDisposable {
+import {TableContext, Table} from "./definitions";
+import ViewModelBase from "./ViewModelBase";
+
+export class TableVm extends ViewModelBase implements Table  {
 
     rows = wx.list<Row>();
 
@@ -14,8 +16,10 @@ export class TableVm implements  Rx.IDisposable {
         this.events({key: 'rowSelectionChanged', value: this.rows.filter(row=> row.isSelected())})
     }
 
-    constructor(private context:DataTableContext) {
-
+    constructor(private context:TableContext) {
+        
+        super();
+        
         if(!context) return;
         context.hook(this);
 
@@ -99,7 +103,7 @@ export class TableVm implements  Rx.IDisposable {
                     row.cells.push(cell);
                 }
 
-                this._disposables.add(
+                this.toBeDispose(
                     row.isSelected.changed.subscribe(()=> this.rowSelectionChanged())
                 );
 
@@ -173,12 +177,7 @@ export class TableVm implements  Rx.IDisposable {
         this.view = e;
     }
 
-    private _disposables = new Rx.CompositeDisposable();
-
-    dispose(){
-        this._disposables.dispose();
-    }
-
+    
     /***
      * if action provided returns  Idisposable, if No Action provided returns Observable<KeyValue>
      * @param params

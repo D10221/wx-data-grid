@@ -1,4 +1,3 @@
-///<reference path="deninitions.ts"/>
 ///<reference path="references.d.ts"/>
 ///<reference path="../typings/tsd.d.ts"/>
 
@@ -22,7 +21,7 @@ class App {
 
         var templates = (<iHTMLTemplateElement>document.getElementById('wx-data-table-templates')).import;
 
-        var template = templates.getElementById('data-table-template');
+        var template = templates.getElementById('data-table-template-styled');
 
         wx.app.component('data-table', DataTable(template.innerHTML));
 

@@ -2,6 +2,7 @@
 import {KeyVaue} from "./Base";
 import {Cell} from './Cell'
 
+
 export class Row {
 
     cells = wx.list<Cell>();
