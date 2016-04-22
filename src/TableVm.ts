@@ -3,11 +3,15 @@ import {KeyVaue, InputTypes} from './Base';
 import Column from './Column';
 import {Row} from './Row';
 import {Cell} from './Cell';
-import {TableContext, Table} from "./definitions";
+import {TableContext, Table, TableOptions} from "./definitions";
 import ViewModelBase from "./ViewModelBase";
 
 export class TableVm extends ViewModelBase implements Table  {
 
+    options: TableOptions = {
+        showRowSelector : true
+    }
+    
     rows = wx.list<Row>();
 
     columns = wx.list<Column>();
@@ -29,24 +33,43 @@ export class TableVm extends ViewModelBase implements Table  {
         var items = dataSource().items;
         if(!items ) return;
 
-        var columnMaps = dataSource().columnMaps;
 
         items.listChanged.subscribe(()=> {
 
-            this.columns.clear();
+            var columnMaps = _.filter(dataSource().columnMaps, m=> !m.isUnbound);
+            var unBoundColumnMaps = _.filter(dataSource().columnMaps, m=> m.isUnbound);
 
-            var first = items.toArray()[0];
-            { // extra column
+            var columns:Column[] = [];
+
+            for (var ucolumn of unBoundColumnMaps){
+                var column = new Column(ucolumn.key,ucolumn.displayName);
+                column.index = ucolumn.columnIndex || 0 ;
+                column.canSort(ucolumn.canSort == true);
+                column.canFilter = ucolumn.canFilter == true;
+                column.isUnbound = true;
+                columns.push(column);
+            }
+            
+            if( this.options.showRowSelector) { // inbuilt column
                 var column = new Column('isSelected','\u273D');
                 column.canSort(false);
                 column.canFilter = false;
                 column.isUnbound = true;
-                this.columns.push(column);
+                column.index = 0 ;
+                column.template = 'column-header-checkbox';
+                column.value(false);
+                this.toBeDispose(
+                    column.value.changed.subscribe(checked=> 
+                        this.selectAllRows(checked))
+                );
+                columns.push(column);
             }
 
             // GenerateColumns from 1st item
             // has to go ...
             // not reliable
+            var first = items.toArray()[0];
+            if(!first) return; 
             for (var key in first) {
                 var column = new Column(key);
                 if(columnMaps ){
@@ -66,22 +89,44 @@ export class TableVm extends ViewModelBase implements Table  {
                     .filterTxtChanged
                     .subscribe(x=> this.filterBy(x));
 
-                this.columns.push(column);
+                columns.push(column);
             }
 
+            columns = _.orderBy(columns, x => x.index);
+
+            this.columns.clear();
+            this.columns.addRange(columns);
             //Rows : is Cell[]
-            var columns = this.columns.toArray();
+
             this.rows.addRange(items.map(x=> {
 
                 var row = new Row();
 
-                var selector = new Cell('isSelected', false);
-                selector.isDirtyCheckEnable = false;
-                selector.value.changed.subscribe((x)=> {
-                    row.isSelected(x == 'true' || x == true);
-                });
-
-                row.cells.push(selector);
+                //TODO:
+                // for(var ucolumn of unBoundColumnMaps){
+                //     row.cells.push( new UnboundCell );
+                // }
+                
+                if( this.options.showRowSelector) { // inbuilt cells 
+                    var selector = new Cell('isSelected', false);
+                    selector.isDirtyCheckEnable = false;
+                    this.toBeDispose(
+                        selector.value.changed.subscribe((x)=> {
+                            row.isSelected(x == 'true' || x == true);
+                        })
+                    );
+                    this.toBeDispose(
+                        row.isSelected
+                            .changed
+                            .where(x=> row.isSelected()!= selector.value())
+                            .subscribe(()=>{
+                                selector.value(row.isSelected())
+                            })
+                    );
+                    row.cells.push(selector);
+                }
+                
+                
                 for (var key in x) {
                     // ** filter out c ell by column
                     var c = _.find(columns, c=> c.key == key);
@@ -113,6 +158,12 @@ export class TableVm extends ViewModelBase implements Table  {
 
     }
 
+    selectAllRows : (checked: boolean) => void = (checked) => {
+        this.rows.forEach((value, index, array) => {
+            value.isSelected(!value.isSelected());
+        })
+    };
+    
     private filterBy(kv:KeyVaue) {
         for (var row of this.rows.toArray()) {
             row.setVisble(kv);
@@ -152,9 +203,7 @@ export class TableVm extends ViewModelBase implements Table  {
         }
         throw 'unkown sort method';
     }
-
-    events = wx.property<KeyVaue>();
-
+    
     view: HTMLElement;
 
     /***
@@ -176,22 +225,5 @@ export class TableVm extends ViewModelBase implements Table  {
         this.view = e;
         this.events( { key: 'postBindingInit', value: e});
     }
-
-    
-    /***
-     * if action provided returns  Idisposable, if No Action provided returns Observable<KeyValue>
-     * @param params
-     * @returns {any}
-     */
-    when( key: string):  Rx.Observable<KeyVaue> ;
-    when( key: string, action? : (kv: KeyVaue)=> void  ):  Rx.IDisposable ;
-    when( key: string, action? : (kv: KeyVaue)=> void  ):  any {
-        if(!action) {
-            return this.events.changed.where(e=> e.key == key);
-        }
-        return this.events.changed.where(e=> e.key == key).subscribe(action);
-
-    }
-
 
 }

@@ -3,8 +3,10 @@
     <table class="mdl-data-table">
         <thead>
         <tr data-bind="foreach: columns">
-            <th >
-                <span data-bind="text: header"></span>
+            <th > <!-- th: <Column>Context -->
+                <!--Header-->
+                <span data-bind="component: { name: template || 'column-header'  , params: $data }">
+                </span>
                 <!--ToggleSearch-->
                 <button class="mdl-button mdl-js-button mdl-button--icon"
                         data-bind="command: toggleSearchVisible, visible: canSort">
@@ -31,7 +33,10 @@
                 <div style="display: flex">
                     <!--CheckBox-->
                     <div data-bind="if: isInputTypeOf('checkbox')">
-                        <div data-bind="component: { name:'wx-checkbox', params: $data }"></div>
+                        <div data-bind="component: {
+                            name:'wx-checkbox',
+                            params: $data
+                        }"></div>
                     </div>
                     <!--Text Field-->
                     <div data-bind="ifnot: isInputTypeOf('checkbox')">
@@ -50,11 +55,26 @@
         </tbody>
     </table>
 </template>
-<template id="wx-data-table-checkbox-template">
-    <!--DataContext: cell: <Cell> -->
+
+<template id="column-header-template">
+    <!--context: Column, desc: 'default header template, plain text'-->
+    <span data-bind="text: header">
+    </span>
+</template>
+
+<template id="column-header-checkbox-template">
+    <!--context: Column, desc: 'default header template, plain text'-->
     <button class="mdl-button mdl-button--icon"
             data-bind="command: toggleValue">
-        <i class="material-icons" data-bind="text: value? 'check' : 'crop_square' "></i>
+        <i class="material-icons" data-bind="text: value | toggleCheckFilter "></i>
+    </button>
+</template>
+
+<template id="wx-checkbox-template">
+    <!--DataContext: { value: voolean , toggleValue: command} -->
+    <button class="mdl-button mdl-button--icon"
+            data-bind="command: toggleValue">
+        <i class="material-icons" data-bind="text: value | toggleCheckFilter "></i>
     </button>
 </template>
 <template id="data-table-template">

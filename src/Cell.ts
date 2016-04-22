@@ -1,11 +1,12 @@
 ///<reference path="references.d.ts"/>
 
-
 import IObservableList = wx.IObservableList;
 
 import {InputTypes, Guid} from "./Base";
 
-export class Cell implements Rx.IDisposable {
+import ViewModelBase from "./ViewModelBase";
+
+export class Cell extends ViewModelBase {
 
     id =  Guid.newGuid();
 
@@ -14,18 +15,23 @@ export class Cell implements Rx.IDisposable {
     isDirtyCheckEnable = true;
 
     revertCmd = wx.command(()=> this.value(this._value));
-
-    _disposables = new Rx.CompositeDisposable();
-
+    
     constructor(public key:string, private _value:any) {
-
+        
+        super();
+        
         this.value = wx.property(_value);
-
-        this._disposables.add(
+        
+        this.toBeDispose(
             this.value.changed
                 .where(e => this.isDirtyCheckEnable)
                 .subscribe(e=> this.isDirty(_value != e))
         );
+        this.toBeDispose( 
+            this.value.changed
+                .subscribe(()=>
+                    this.events( {key: key, value: this.value() })
+        ));
     }
 
     value:wx.IObservableProperty<any>;
@@ -65,7 +71,5 @@ export class Cell implements Rx.IDisposable {
         return this.getInputType() == type;
     }
 
-    dispose(){
-        this._disposables.dispose();
-    }
+   
 }

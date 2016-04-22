@@ -24,5 +24,32 @@
     "urls": {
       "getter" : "../data/materials_two.json"
     }
+  },
+  {
+    "key" : "materials (Unbound Columns) [TODO]]" ,
+    "urls": {
+      "getter": "../data/materials.json"
+    },
+    "columnMaps" : [
+      {
+        "key": "created",
+        "displayName": "Created",
+        "inputType": "date",
+        "converter": "string-to-date-converter"
+      },
+      {
+        "key": "modified",
+        "displayName": "Modified",
+        "inputType": "date",
+        "converter": "string-to-date-converter"
+      },{
+        "key": "isSelected",
+        "displayName": "*",
+        "canFilter": false,
+        "canSort": false,
+        "isUnbound": true,
+        "columnIndex": 99
+      }
+    ]
   }
 ]

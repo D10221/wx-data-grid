@@ -10,9 +10,16 @@ export interface IHaveEvents {
     when( key: string, action? : (kv: KeyVaue)=> void  ):  Rx.IDisposable ;
     events : wx.IObservableProperty<KeyVaue>;
 }
-
+export interface TableOptions{
+    /***
+     * Show inbuilt Column, for Is row Selected
+     */
+    showRowSelector: boolean
+}
 export interface Table extends IHaveEvents, Rx.IDisposable {
+
     view:HTMLElement;
+    options: TableOptions ;
 }
 
 export interface TableContext {
@@ -32,7 +39,14 @@ export interface ColumnMap {
     key:string,
     displayName?:string;
     inputType?:string;
-    converter?: string
+    converter?: string,
+    isUnbound?: boolean,
+    canSort?: boolean,
+    canFilter?: boolean,
+    /***
+     * Desired : not granted
+     */
+    columnIndex?: number
 }
 
 

@@ -1,17 +1,31 @@
 
 import {KeyVaue,Guid} from "./Base";
+import ViewModelBase from "./ViewModelBase";
 
-export default class Column implements Rx.IDisposable {
+export default class Column extends ViewModelBase {
+
+    constructor(public key:string, public header?:any) {
+        
+        super();
+        
+        this.header = header || key;
+        
+        this.toBeDispose(this.order);
+    }
+
+    index = 1 ;
 
     id = Guid.newGuid();
 
-    constructor(public key:string, public header?:string) {
-        this.header = header || key;
-    }
-
+    /***
+     * wx.Component.name to bind this column Too 
+     */
+    template: string ;
+    
     converter: wx.IExpressionFilter;
 
     inputType:string;
+    
     isUnbound = false;
     /***
      * 'desc' || 'asc'
@@ -40,6 +54,7 @@ export default class Column implements Rx.IDisposable {
     }
 
     filterTxt = wx.property("");
+    
     canFilter = true;
 
     get filterTxtChanged():Rx.Observable<KeyVaue> {
@@ -51,7 +66,16 @@ export default class Column implements Rx.IDisposable {
             });
     }
 
-    dispose() {
-        this.order.dispose();
-    }
+    /***
+     * Hold arbitrary value
+     */
+    value:wx.IObservableProperty<any> = wx.property(false);
+
+    /***
+     * easy booelan toggle without binding to checked in input checkbox 
+     * @type {ICommand<any>}
+     */
+    toggleValue = wx.command(()=> this.value(!this.value()));
+    
+   
 }

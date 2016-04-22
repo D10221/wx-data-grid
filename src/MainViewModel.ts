@@ -61,6 +61,8 @@ export class MainViewModel {
                 source.items = wx.list();
             }
             this.dataSources.addRange(sources);
+            this.dataSource(this.dataSources.toArray()[0]);
+            this.updateContext(this);
         });
 
         var load = ()=> {
