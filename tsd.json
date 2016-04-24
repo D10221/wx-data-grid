@@ -19,6 +19,18 @@
     },
     "es6-promise/es6-promise.d.ts": {
       "commit": "544a35a10866b32afda9c7f029c0764558563f4f"
+    },
+    "assertion-error/assertion-error.d.ts": {
+      "commit": "544a35a10866b32afda9c7f029c0764558563f4f"
+    },
+    "chai/chai.d.ts": {
+      "commit": "544a35a10866b32afda9c7f029c0764558563f4f"
+    },
+    "mocha/mocha.d.ts": {
+      "commit": "544a35a10866b32afda9c7f029c0764558563f4f"
+    },
+    "node/node.d.ts": {
+      "commit": "5c5c3d26a1f30c4c29eeccbf318d44e844327ca4"
     }
   }
 }

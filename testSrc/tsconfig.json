@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "inlineSourceMap": true
+  },
+  "exclude": [
+    "../node_modules"
+  ],
+  "files": [
+    "./test.d.ts", "./test.ts"
+  ]
+}

@@ -24,7 +24,7 @@ export interface Table extends IHaveEvents, Rx.IDisposable {
 
 export interface TableContext {
 
-    dataSource : wx.IObservableProperty<DataSource>;
+    dataSource : DataSource;
     /***
      * Gets Call when TableVm initialize from Parameters
      * there we can subscribe to events?/opbservables
@@ -32,10 +32,11 @@ export interface TableContext {
      * TODO: TableVm should be an interface
      * @param receiver
      */
-    hook(me: Table);
+    hook?:(me: Table)=>void;
 }
 
 export interface ColumnMap {
+    
     key:string,
     displayName?:string;
     inputType?:string;
@@ -47,10 +48,14 @@ export interface ColumnMap {
      * Desired : not granted
      */
     columnIndex?: number
+    /***
+     * Set to false to hide 
+     */
+    browsable?:Boolean;
+
 }
 
-
-export interface DataSource {
+export interface DataSourceDescription {
     //required
     key:string ;
 
@@ -59,9 +64,9 @@ export interface DataSource {
         getter: string
     }
 
-    columnMaps?:ColumnMap[];
-    /***
-     * Has to be populated here,
-     */
-    items?:wx.IObservableList<{}>;
+    columnMaps?:ColumnMap[]; 
+}
+
+export interface DataSource extends DataSourceDescription {
+    items?: {}[];
 }

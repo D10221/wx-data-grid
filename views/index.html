@@ -37,15 +37,24 @@
 </head>
 <body>
 <main id="main-view" class="mdl-layout__content" >
-    <div class="mdl-grid">
-        <div>
-            <select data-bind="foreach: dataSources, selectedValue: @dataSource">
-                <option data-bind="value: $data, text: key"></option>
+    <div style="display:flex;flex-direction: row;align-items: center">
+        <button class="mdl-button mdl-js-button " style="margin: 10px" data-bind="command: loadCmd">
+            LOAD
+        </button>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select">
+            <label for="dataSourceSelector" >
+                Data Source
+            </label>
+            <select id="dataSourceSelector"
+                    data-bind="foreach: dataSources, selectedValue: @dataSourceDescription"
+                    class="mdl-list"
+                    style="width: 300px; margin-top: 5px; background: transparent">
+                <option data-bind="value: $data, text: key" style="background-color: transparent"></option>
             </select>
         </div>
     </div>
     <div data-bind="with: @context">
-        <div  data-bind="component: { name: 'data-table' , params: $data }"></div>
+        <div  data-bind="component: { name: 'wx-data-table' , params: $data }"></div>
     </div>
 </main>
 
@@ -53,9 +62,9 @@
 
 <script src="../node_modules/material-design-lite-oob/res/material.min.js"></script>
 <script src="../node_modules/moment/moment.js"></script>
-<script src="../node_modules/lodash/lodash.js" ></script>
+
 <script src="../node_modules/rx/dist/rx.all.js" ></script>
 <script src="../node_modules/webrx/dist/web.rx.js" ></script>
-<script src="../dist/app.js"></script>
+<script src="../built/bundle.js"></script>
 </body>
 </html>

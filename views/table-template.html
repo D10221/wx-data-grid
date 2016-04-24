@@ -67,7 +67,7 @@
     <!--context: Column, desc: 'default header template, plain text'-->
     <button class="mdl-button mdl-button--icon"
             data-bind="command: toggleValue">
-        <i class="material-icons" data-bind="text: value | toggleCheckFilter "></i>
+        <i class="material-icons" data-bind="text: value | toggleCheck "></i>
     </button>
 </template>
 
@@ -75,7 +75,7 @@
     <!--DataContext: { value: wx.IObservableProperty>boolean> } -->
     <button class="mdl-button mdl-button--icon"
             data-bind="command: command">
-        <i class="material-icons" data-bind="text: value | toggleCheckFilter "></i>
+        <i class="material-icons" data-bind="text: value | toggleCheck "></i>
     </button>
 </template>
 

@@ -1,8 +1,9 @@
 module.exports = {
-    entry: "./src/app.ts",
+    entry: "./testSrc/test.ts",
     output: {
         path: __dirname,
-        filename: "built/bundle.js"
+        target: "commonjs",
+        filename: "test/test.bundle.js"
     },
     resolve: {
         extensions: ['', '.webpack.js', '.web.js', '.ts', '.tsx', '.js']
@@ -11,12 +12,10 @@ module.exports = {
     devtool: 'source-map',
     module: {
         loaders: [
-            { test: /\.css$/, loader: "style!css" },
             { test: /\.tsx?$/, loader: "ts-loader" }
         ]
     },
     ts:{
-        configFileName: './src/tsconfig.json'
+        configFileName: './testSrc/tsconfig.json'
     }
 };
-

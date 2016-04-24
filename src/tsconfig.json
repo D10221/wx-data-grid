@@ -1,17 +1,15 @@
 {
   "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
     "noImplicitAny": false,
     "removeComments": false,
     "preserveConstEnums": true,
     "noImplicitReturns": true,
-    "rootDir": "../src",
-    "module": "commonjs",
-    "target": "es5",
     "sourceMap": true,
-    "outDir": "../built",
-    "declaration": true
+    "outDir": "../built"
   },
   "exclude": [
-    "../node_modules","../built", "../dist"
+    "../node_modules","../built", "../dist","../test"
   ]
 }

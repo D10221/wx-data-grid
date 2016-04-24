@@ -29,12 +29,41 @@ export default class ViewModelBase implements Rx.IDisposable , IHaveEvents {
         return this.events.changed.where(e=> e.key == key).subscribe(action);
 
     }
-    addTwoWaySubscribtion<T>(left: wx.IObservableProperty<T>, right: wx.IObservableProperty<T>, vm?: ViewModelBase): void {
-        
-        (vm|| this).toBeDispose(this.twoWaySubscribtion(left,right))
+
+    addTwoWaySubscribtion<T>(left: wx.IObservableProperty<T>, right: wx.IObservableProperty<T>, x?: ViewModelBase): void;
+    addTwoWaySubscribtion<T>(left: wx.IObservableProperty<T>, right: wx.IObservableProperty<T>, x?: Rx.CompositeDisposable): void;
+    addTwoWaySubscribtion<T>(left: wx.IObservableProperty<T>, right: wx.IObservableProperty<T>, x?: any): void {
+        if(!x || x instanceof ViewModelBase ){
+            (x|| this)._disposables.add(this.twoWaySubscription(left,right));
+            return;
+        }
+        if(x instanceof Rx.CompositeDisposable){
+            x.add(this.twoWaySubscription(left,right));
+        }         
+    }
+
+    addChangeSubscription<T>(prop: wx.IObservableProperty<T>, action: ((x:T)=>void), vm?: ViewModelBase ) :void {
+        (vm||this).toBeDispose(prop.changed.subscribe(action));
+    }
+
+    addSubscription<T>(observable: Rx.Observable<T>, action: (t:T)=> void, x?: ViewModelBase) : void;
+    addSubscription<T>(observable: Rx.Observable<T>, action: (t:T)=> void, x?: Rx.CompositeDisposable) : void;
+    addSubscription<T>(observable: Rx.Observable<T>, action: (t:T)=> void, x?: any) : void {
+
+        if(!x || x instanceof ViewModelBase) {
+            (x||this)._disposables.add(
+                observable.subscribe(action)
+            );
+            return;
+        }
+
+        if(x instanceof Rx.CompositeDisposable){
+            x.add(observable.subscribe(action));
+        }
+
     }
     
-    twoWaySubscribtion<T>(left: wx.IObservableProperty<T>, right: wx.IObservableProperty<T>): Rx.IDisposable {
+    twoWaySubscription<T>(left: wx.IObservableProperty<T>, right: wx.IObservableProperty<T>): Rx.IDisposable {
         
         var disposables = new Rx.CompositeDisposable();
         

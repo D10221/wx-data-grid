@@ -1,13 +1,16 @@
 ///<reference path="app.definitions.d.ts"/>
 
-import {DataSource, TableContext, Table} from "./definitions";
+import {DataSource, TableContext, Table, DataSourceDescription} from "./definitions";
 import {renewSubscription } from "./Base";
+import ViewModelBase from "./ViewModelBase";
 
-export class MainViewModel {
+export class MainViewModel extends ViewModelBase {
 
     brand = wx.property('tiny-x');
 
-    dataSources = wx.list<DataSource>();
+    dataSources = wx.list<DataSourceDescription>();
+
+    dataSourceDescription = wx.property<DataSourceDescription>();
 
     dataSource = wx.property<DataSource> ();
 
@@ -51,53 +54,56 @@ export class MainViewModel {
     hookSubscriptions = new Rx.CompositeDisposable();
 
     constructor() {
-
-        this.context(this);
-
-        fetch('../data/datasource.json').then(r=>r.json()).then( (sources: DataSource[]) =>{
-            for(var source of sources){
-                // initialize the prop, is not there
-                // datasource will provide url's for get/update/insert || get/post ? ?
-                source.items = wx.list();
-            }
-            this.dataSources.addRange(sources);
-            this.dataSource(this.dataSources.toArray()[0]);
-            this.updateContext(this);
-        });
-
-        var load = ()=> {
-            fetch(this.dataSource().urls.getter)
-                .then(r => r.json())
-                .then(items => {
-
-                    if(this.dataSource().items){
-                        this.dataSource().items.clear();
-                        this.dataSource().items.addRange(items);
-                        return;
-                    }
-                    this.dataSource().items = wx.list(items);
-                })
-                .catch(e=> {
-                    console.log(`Error: ${e}`);
-                });
+        
+        super();
+        
+        this.updateContext = ()=>{
+            this.context({
+                dataSource: this.dataSource(),
+                hook: this.hook
+            });
         };
+        
+        fetch('../data/datasource.json')
+            .then(r=>r.json())
+            .then( (sources: DataSourceDescription[]) => this.dataSources.addRange(sources));
 
-        //load();
-
+        this.dataSources.listChanged.where(x => x !=null ).take(1).subscribe ( () => {
+            var source = this.dataSources.toArray()[0];
+            if(source){
+                this.dataSourceDescription(source);
+            }
+        });
+        
         this.dataSource.changed.subscribe(()=> {
-            load();
-            this.updateContext(this);
-
-        });
-
+            this.updateContext();
+        })
     }
-    private updateContext(context:TableContext) {
-        // Change Instance so wx gets notified of the change
-        // doing context(this) , does not trigger change
-        this.context({
-            dataSource: context.dataSource,
-            hook: context.hook
+    
+    loadDataSource: ()=> void = () => {
+        var description = this.dataSourceDescription();
+        if(description){
+            this.loadDataSourceDescription(description)
+        }
+    };
+    
+    loadDataSourceDescription: (description :DataSourceDescription)=> void = (description) => {
+        this.toDataSource(description).then(dataSource=> this.dataSource(dataSource));
+    };
+    
+    toDataSource: (description: DataSourceDescription) => Promise<DataSource> = (description)=> {
+        return fetch(description.urls.getter).then(r=>r.json()).then(items => {
+            return {
+                key: description.key,
+                urls: description.urls,
+                columnMaps: description.columnMaps,
+                items: items
+            }
         });
-    }
+    };
+    
+    loadCmd = wx.command(()=> this.loadDataSource());
+    
+    private updateContext : () => void ;
 }
 

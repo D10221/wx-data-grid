@@ -12,7 +12,7 @@ export class Cell extends ViewModelBase {
         
         super();
         
-        this.value = wx.property(_value);
+        this.value(_value);
         
         this.toBeDispose(
             this.value.changed
@@ -33,9 +33,11 @@ export class Cell extends ViewModelBase {
 
     isDirtyCheckEnable = true;
 
+    columnIndex: number;
+    
     revertCmd = wx.command(()=> this.value(this._value));
 
-    value:wx.IObservableProperty<any>;
+    value = wx.property<any>();
     
     template: string;
     

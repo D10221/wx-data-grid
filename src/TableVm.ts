@@ -1,16 +1,19 @@
+///<reference path="references.d.ts"/>
 
-import {KeyVaue, InputTypes} from './Base';
+import {KeyVaue} from './Base';
 import Column from './Column';
 import {Row} from './Row';
 import {Cell} from './Cell';
-import {TableContext, Table, TableOptions} from "./definitions";
+import {TableContext, Table, TableOptions, ColumnMap} from "./definitions";
 import ViewModelBase from "./ViewModelBase";
+import {ColumnBuilder} from "./ColumnBuilder";
+import {RowFactory, CellFactory} from "./RowBuilder";
 
 export class TableVm extends ViewModelBase implements Table  {
 
     options: TableOptions = {
         showRowSelector : true
-    }
+    };
     
     rows = wx.list<Row>();
 
@@ -23,157 +26,64 @@ export class TableVm extends ViewModelBase implements Table  {
     constructor(private context:TableContext) {
         
         super();
-        
+         
         if(!context) return;
-        context.hook(this);
+        if(context.hook){
+            context.hook(this);
+        }
 
-        var dataSource = context.dataSource;
-        if(!dataSource) return;
+        if(!this.HasItems(context)) return ;
 
-        var items = dataSource().items;
-        if(!items ) return;
+        // TODO: ColumnDefinitions  
+        this.inBuiltComlumnMaps.push( {
+            key: 'isSelected',
+            displayName: '*',
+            canSort: false,
+            canFilter: false,
+            isUnbound: true,
+            columnIndex: -1 ,
+            browsable: true
+        });
 
+        this.columnConfigurations['isSelected'] = (column)=> {
 
-        items.listChanged.subscribe(()=> {
+            this.addSubscription(
+                column.value.changed,
+                checked => this.selectAllRows(<boolean>checked),
+                this);
 
-            var columnMaps = _.filter(dataSource().columnMaps, m=> !m.isUnbound);
-            var unBoundColumnMaps = _.filter(dataSource().columnMaps, m=> m.isUnbound);
+            column.value(false);
 
-            var columns:Column[] = [];
+            return column;
+        };
 
-            for (var ucolumn of unBoundColumnMaps){
-                var column = new Column(ucolumn.key,ucolumn.displayName);
-                column.index = ucolumn.columnIndex || 0 ;
-                column.canSort(ucolumn.canSort == true);
-                column.canFilter = ucolumn.canFilter == true;
-                column.isUnbound = true;
-                columns.push(column);
-            }
-            
-            if( this.options.showRowSelector) { // inbuilt column
-                var column = new Column('isSelected','\u273D');
-                column.canSort(false);
-                column.canFilter = false;
-                column.isUnbound = true;
-                column.index = 0 ;
-                column.template = 'column-header-checkbox';
-                column.value(false);
-                this.toBeDispose(
-                    column.value.changed.subscribe(checked=> 
-                        this.selectAllRows(checked))
-                );
-                columns.push(column);
-            }
+        this.columnTemplates['isSelected'] = "column-header-checkbox";
 
-            // GenerateColumns from 1st item
-            // has to go ...
-            // not reliable
-            var first = items.toArray()[0];
-            if(!first) return; 
-            for (var key in first) {
-                var column = new Column(key);
-                if(columnMaps ){
-                    var map = _.find(columnMaps, m=> m.key == key);
-                    if(map){
-                        column.header = map.displayName;
-                        column.inputType = map.inputType;
-                        if(map.converter){
-                            column.converter = wx.app.filter(map.converter);
-                        }
-                    }
-                }
-                column
-                    .orderChanged
-                    .subscribe(x=> this.sortBy(x.key, x.value));
-                column
-                    .filterTxtChanged
-                    .subscribe(x=> this.filterBy(x));
-
-                columns.push(column);
-            }
-
-            columns = _.orderBy(columns, x => x.index);
-
-            this.columns.clear();
-            this.columns.addRange(columns);
-            //Rows : is Cell[]
-
-            this.rows.addRange(items.map(x=> {
-
-                var row = new Row();
-
-                //TODO:
-                // for(var ucolumn of unBoundColumnMaps){
-                //     row.cells.push( new UnboundCell );
-                // }
-                
-                if( this.options.showRowSelector) { // inbuilt cells 
-                    var selector = new Cell('isSelected', false);
-                    selector.isDirtyCheckEnable = false;
-
-                    this.addTwoWaySubscribtion(
-                        selector.value,
-                        row.isSelected,
-                        this
-                    );
-                    row.cells.push(selector);
-                }
-                
-                
-                for (var key in x) {
-
-                    // ** filter out column ell by column
-                    var column = _.find(columns, c=> c.key == key);
-
-                    if (!column || !column.browsable) {
-                        continue
-                    }
-
-                    //** new cell
-                    var value = column.converter ? column.converter(x[key]) : x[key] ;
-                    var cell = new Cell(key, value);
-
-                    // Override:  by settings , config ... etc
-                    if (InputTypes.any(column.inputType)) {
-                        cell.inputType = column.inputType;
-                    }
-
-                    // OPTION ? 
-                    // var map = _.find(columnMaps, m=> m.key == key);
-                    // if(map && map.cellTemplate) {
-                    //     cell.template = map.template ;
-                    // }
-
-
-
-                    // if(column.isUnbound){
-                    //     cell.isDirtyCheckEnable = false;
-                    // }
-
-                    row.cells.push(cell);
-                }
-
-                this.toBeDispose(
-                    row.isSelected.changed.subscribe(()=> this.rowSelectionChanged())
-                );
-
-                return row;
-            }));
-        })
+        var columnMaps = _.map(context.dataSource.columnMaps, x=> _.clone(x));
+        
+        this.build(columnMaps, context.dataSource.items);
 
     }
-
+    
+    HasItems : (context: TableContext) => boolean = (context ) =>{
+        return context && context.dataSource && this.Any(context.dataSource.items)
+    };
+    
+    Any : (items:any[]) => boolean = (items)=>{
+        return items  && items.length > 0  ; 
+    };
+    
     selectAllRows : (checked: boolean) => void = (checked) => {
         this.rows.forEach((value, index, array) => {
             value.isSelected(!value.isSelected());
         })
     };
     
-    private filterBy(kv:KeyVaue) {
+    private filterBy: (kv:KeyVaue)=> void = (kv)=>{
         for (var row of this.rows.toArray()) {
             row.setVisble(kv);
         }
-    }
+    };
 
     private sortBy(key:string, mode:string) {
 
@@ -208,6 +118,73 @@ export class TableVm extends ViewModelBase implements Table  {
         }
         throw 'unkown sort method';
     }
+
+    columnConfigurations  = new Map<string, (column: Column)=> Column >();
+    columnTemplates = new Map<string,string> ();
+    inBuiltComlumnMaps : ColumnMap[] = [] ;
+
+    build:(columnMaps: ColumnMap[], items: {}[]) =>void= (columnMaps,items)=> {
+
+        columnMaps = columnMaps || [] ;
+        for ( var cMap of this.inBuiltComlumnMaps) {
+            columnMaps.push(cMap);
+        }   
+        
+        var first = items[0];
+        
+        var builder = new ColumnBuilder(first, columnMaps,this.columnConfigurations,this.columnTemplates);
+
+        var columns = builder.columns ;
+        if(!columns) {
+            return; 
+        }
+         
+        for (var column of columns){
+            
+            if(column.canSort){
+                this.addSubscription(
+                    column.orderChanged, x=> this.sortBy(x.key, x.value)
+                );
+            }
+            if(column.canFilter){
+                this.addSubscription(
+                    column.filterTxtChanged, this.filterBy
+                );
+            }
+            
+        }
+        
+        // Before Add cell 
+        var beforeAdd = (row) => {
+            this.addSubscription(
+                row.isSelected.changed,
+                ()=> this.rowSelectionChanged(),
+                this);
+            return row;
+        };
+        
+        var cellFactories = new Map<string, CellFactory>();
+        
+        cellFactories["isSelected"] = (row, column, value )=> {
+            
+            var cell = new Cell(column.kill, false);
+            cell.isDirtyCheckEnable = false;
+            this.addTwoWaySubscribtion(
+                cell.value,
+                row.isSelected,
+                this
+            );
+            return cell;
+        };
+        
+        var rowFactory = new RowFactory(columns , beforeAdd, cellFactories);
+
+        this.columns.clear();
+        for(var column of columns){
+            this.columns.add(column);
+        }
+        this.rows.addRange(rowFactory.getRows(items));
+    };
     
     view: HTMLElement;
 
@@ -219,7 +196,7 @@ export class TableVm extends ViewModelBase implements Table  {
     preBindingInit: any = (e:HTMLElement)=> {
         this.view = e;
         this.events( { key: 'preBindingInit', value: e});
-    }
+    };
 
     /***
      * wx: searchs for properties:
@@ -229,6 +206,6 @@ export class TableVm extends ViewModelBase implements Table  {
     postBindingInit: any = (e:HTMLElement)=> {
         this.view = e;
         this.events( { key: 'postBindingInit', value: e});
-    }
+    };
 
 }
