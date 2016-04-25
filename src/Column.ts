@@ -77,5 +77,21 @@ export default class Column extends ViewModelBase {
      */
     toggleValue = wx.command(()=> this.value(!this.value()));
     
-   
+   indexCmd = wx.command(x=> {
+       
+       if(this.index==0) return ;
+       
+       if(x == '+'){
+           this.index++;
+           this.events({key: 'index', value: this.index});
+           return;
+       }
+       if(x == '-'){
+           this.index--;
+           this.events({key: 'index', value: this.index});
+           return;
+       }
+   });
+    
+    canMove = true;
 }

@@ -7,18 +7,47 @@
                 <!--Header-->
                 <span data-bind="component: { name: template || 'column-header'  , params: $data }">
                 </span>
-                <!--ToggleSearch-->
-                <button class="mdl-button mdl-js-button mdl-button--icon"
-                        data-bind="command: toggleSearchVisible, visible: canSort">
-                    <i class="material-icons" >search</i>
+                <button data-bind="attr:{ id: 'column_menu_'+id }, visible: index > 0"
+                        class="mdl-button mdl-js-button mdl-button--icon">
+                    <i class="material-icons">more_vert</i>
                 </button>
-                <!--Sort-->
-                <button class="mdl-button mdl-js-button mdl-button--icon"
-                        data-bind="
+
+                <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+                    data-bind="attr:{ for: 'column_menu_'+id }">
+                    <li class="mdl-menu__item">
+                        <!--ToggleSearch-->
+                        <button class="mdl-button mdl-js-button mdl-button--icon"
+                                data-bind="command: toggleSearchVisible, visible: canSort">
+                            <i class="material-icons" >filter_list</i>
+                        </button>
+                        <span>filter</span>
+                    </li>
+                    <li class="mdl-menu__item">
+                        <!--Sort-->
+                        <button class="mdl-button mdl-js-button mdl-button--icon"
+                                data-bind="
                                 command: toggleOrder,
                                 visible: @canSort" >
-                    <i class="material-icons" data-bind="text: order == 'asc' ? 'keyboard_arrow_down' : 'keyboard_arrow_up' ,"></i>
-                </button>
+                            <i class="material-icons" data-bind="text: order == 'asc' ? 'keyboard_arrow_down' : 'keyboard_arrow_up' ,"></i>
+                        </button>
+                        <span >order</span>
+                    </li>
+                    <li class="mdl-menu__item">
+                        <div style="display: flex;align-items: center">
+                            <button data-bind="command: { command: indexCmd, parameter: '-' }"
+                                    class="mdl-button mdl-js-button mdl-button--icon">
+                                <i class="material-icons">chevron_left</i>
+                            </button>
+                            <span> move </span>
+                            <button data-bind="command: { command: indexCmd, parameter: '+' }"
+                                    class="mdl-button mdl-js-button mdl-button--icon">
+                                <i class="material-icons">chevron_right</i>
+                            </button>
+                        </div>
+                    </li>
+                </ul>
+
+
                 <!--Search Box-->
                 <div data-bind="visible: canFilter && @isSortVisible">
                     <input type="text" data-bind="value: @filterTxt" class="mdl-textfield__input" />

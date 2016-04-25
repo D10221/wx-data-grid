@@ -42,15 +42,14 @@ export interface ColumnMap {
     inputType?:string;
     converter?: string,
     isUnbound?: boolean,
-    canSort?: boolean,
-    canFilter?: boolean,
     /***
      * Desired : not granted
      */
     columnIndex?: number
-    /***
-     * Set to false to hide 
-     */
+    // maybe features enum ? or ... :[ "sort", "filter", "move", "hidden", "visible" , etc ...  ] 
+    canSort?: boolean,
+    canFilter?: boolean,
+    canMove?: boolean,
     browsable?:Boolean;
 
 }

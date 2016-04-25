@@ -21,6 +21,8 @@ class App {
 
         var templates = (<iHTMLTemplateElement>document.getElementById('wx-data-table-templates')).import;
 
+       // var htmlCollection = templates.getElementsByTagName("template");
+        
         wx.app.component('wx-data-table', {
             template: templates.getElementById('data-table-template-styled').innerHTML,
             viewModel: (params:TableContext)=> new TableVm(params),
@@ -31,6 +33,7 @@ class App {
         wx.app.component('column-header', {
             template: templates.getElementById('column-header-template').innerHTML,
         });
+        
         wx.app.component('column-header-checkbox', {
             template: templates.getElementById('column-header-checkbox-template').innerHTML,
         });

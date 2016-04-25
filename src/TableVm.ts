@@ -40,8 +40,10 @@ export class TableVm extends ViewModelBase implements Table  {
             displayName: '*',
             canSort: false,
             canFilter: false,
+            // maybe features enum ? or ... :[ "sort", "filter", "move", "hidden", "visible" , etc ...  ]
+            canMove: false,
             isUnbound: true,
-            columnIndex: -1 ,
+            columnIndex: 0 ,
             browsable: true
         });
 
@@ -151,6 +153,11 @@ export class TableVm extends ViewModelBase implements Table  {
                     column.filterTxtChanged, this.filterBy
                 );
             }
+            this.toBeDispose(
+                column.when('index', x => {
+                    this.sortColumns();
+                })
+            );
             
         }
         
@@ -184,6 +191,12 @@ export class TableVm extends ViewModelBase implements Table  {
             this.columns.add(column);
         }
         this.rows.addRange(rowFactory.getRows(items));
+    };
+    
+    sortColumns:() => void = () => {
+        //var columns = this.columns.toArray();
+        this.columns.sort((a,b)=> a.index );
+        //this.columns.addRange(_.orderBy(columns, c=> c.index));
     };
     
     view: HTMLElement;

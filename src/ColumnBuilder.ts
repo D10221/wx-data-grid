@@ -53,7 +53,7 @@ export class ColumnBuilder {
             }
         });
         
-        var i = 0;
+        var i = 1;
         for (var info of setups){
 
             var map = info.map;
@@ -64,7 +64,7 @@ export class ColumnBuilder {
             
             var column = new Column(info.key);
             
-            column.index = map && map.columnIndex? map.columnIndex : i ;
+            column.index = map && _.isNumber( map.columnIndex ) ? map.columnIndex : i ;
             
             column.header =  map && map.displayName ? map.displayName : info.key ;
             
